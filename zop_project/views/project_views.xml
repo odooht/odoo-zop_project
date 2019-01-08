@@ -80,20 +80,14 @@
             <field name="arch" type="xml">
                 <tree string="Tasks">
                     <field name="project_id"/>
-                    <field name="parent_id"/>
-                    <field name="name"/>
                     <field name="full_name"/>
                     <field name="date_start"/>
                     <field name="date_end"/>
                     <field name="subtask_count"/>
-                    <field name="child_ids"/>
                     <field name="uom_id"/>
                     <field name="qty"/>
                     <field name="price"/>
                     <field name="amount"/>
-                    <field name="daywork_ids"/>
-                    <field name="is_leaf"/>
-                    <field name="tag_ids"/>
                 </tree>
             </field>
         </record>
