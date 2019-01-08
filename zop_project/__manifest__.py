@@ -17,7 +17,7 @@ Project Manage.
     'depends': ['project', 'uom'],
     'data': [
         #'security/ir.model.access.csv',
-        #'views/top_views.xml',
+        'views/project_views.xml',
     ],
     'demo': [
         #

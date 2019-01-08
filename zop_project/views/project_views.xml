@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+        <menuitem id="menu_project_schedule" 
+            name="Schedule Manage" 
+            parent="menu_main_pm"
+            sequence="90" 
+            groups="project.group_project_manager"/>
+
+
+        <record model="ir.actions.act_window" id="action_daywork_list">
+            <field name="name">Dayworks</field>
+            <field name="res_model">project.task.daywork</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="help" type="html">
+                <p class="oe_view_nocontent_create">Create a daywork
+                </p>
+            </field>
+        </record>
+
+        <menuitem id="menu_project_schedule_daywork" 
+            name="Dayworks" 
+            parent="menu_project_schedule"
+            sequence="80" 
+            action="action_daywork_list"
+            groups="project.group_project_manager"/>
+
+
+
+</odoo>
+
