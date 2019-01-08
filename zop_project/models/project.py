@@ -75,7 +75,7 @@ class TaskDaywork(models.Model):
     name = fields.Char('Name' )
     date = fields.Date('Date',required=True,index=True )
     
-    task_id = fields.Many2one('project.task', 'Last Daywork')
+    task_id = fields.Many2one('project.task', 'Task')
     last_daywork_id = fields.Many2one('project.task.daywork', 'Last Daywork')
     qty = fields.Float('Quantity', default=0.0)
     qty_open = fields.Float('Open Quantity', default=0.0, compute = '_compute_qty')

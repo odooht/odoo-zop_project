@@ -24,6 +24,23 @@
             action="action_daywork_list" />
 
 
+        <record model="ir.actions.act_window" id="action_project_list">
+            <field name="name">Projects</field>
+            <field name="res_model">project.project</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="help" type="html">
+                <p class="oe_view_nocontent_create">Create a Project
+                </p>
+            </field>
+        </record>
+
+        <menuitem id="menu_project_schedule_project" 
+            name="Projects" 
+            parent="menu_project_schedule"
+            sequence="10" 
+            action="action_project_list" />
+
 
 </odoo>
 
