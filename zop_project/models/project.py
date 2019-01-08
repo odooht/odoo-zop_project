@@ -102,11 +102,12 @@ class TaskDaywork(models.Model):
     qty_close = fields.Float('Close Quantity', default=0.0, compute = '_compute_qty')
 
     @api.multi
-    @api.depends('project_id','task_id.full_name')
+    @api.depends('task_id.full_name')
     def _compute_name(self):
         for rec in self:
-            rec.name  = rec.task_id.name + '.' + fields.Date.to_string(rec.date)
-            rec.full_name = rec.task_id.full_name + '.' + fields.Date.to_string(rec.date)
+            if task_id:
+                rec.name  = rec.task_id.name + '.' + fields.Date.to_string(rec.date)
+                rec.full_name = rec.task_id.full_name + '.' + fields.Date.to_string(rec.date)
 
 
     @api.multi
