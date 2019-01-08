@@ -13,7 +13,7 @@ class Project(models.Model):
     _inherit = "project.project"
     
     # inherit from project
-    name = fields.Char("Name", index=True, required=True, track_visibility='onchange')
+    #name = fields.Char("Name", index=True, required=True, track_visibility='onchange')
     
     # customer, employer
     #partner_id = fields.Many2one('res.partner', string='Customer', auto_join=True, track_visibility='onchange')
