@@ -45,7 +45,7 @@
         </record>
 
 
-        <record id="view_project_player_form" model="ir.ui.view">
+        <record id="project_form" model="ir.ui.view">
             <field name="name">project.project.form</field>
             <field name="model">project.project</field>
             <field name="arch" type="xml">
@@ -84,7 +84,7 @@
         <record id="action_project_list_form" model="ir.actions.act_window.view">
             <field eval="2" name="sequence"/>
             <field name="view_mode">form</field>
-            <field name="view_id" ref="project_tree"/>
+            <field name="view_id" ref="project_form"/>
             <field name="act_window_id" ref="action_project_list"/>
         </record>
 
