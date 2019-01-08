@@ -56,6 +56,11 @@ class Task(models.Model):
     qty = fields.Float('Planed Quantity', default=0.0)
     price = fields.Float('Price', default=0.0 )
     amount = fields.Float('Planed Amount', default=0.0, compute = '_compute_amount')
+
+    qty_acc = fields.Float('Accumulate Amount', default=0.0, compute = '_compute_acc')
+    amount_acc = fields.Float('Accumulate Amount', default=0.0, compute = '_compute_acc')
+    
+    rate = fields.Float('Rate', default=0.0, compute = '_compute_rate' )
     
     daywork_ids = fields.One2many('project.task.daywork','task_id',string='Task Dayworks')
 
@@ -68,8 +73,30 @@ class Task(models.Model):
             else:
                 rec.full_name  = rec.name
 
+    @api.multi
+    @api.depends('amount','rate')
+    def _compute_acc(self):
+        for rec in self:
+            rec.rate = ( rec.amount and rec.amount_acc 
+                       ) and ( rec.amount_acc / rec.amount ) or 0.0
 
-    
+
+    @api.multi
+    @api.depends('is_leaf','daywork_ids.qty_close')
+    def _compute_acc(self):
+        for rec in self:
+            if rec.is_leaf:
+                works = rec.daywork_ids.sorted(key='data', reverse=True)
+                if works:
+                    rec.qty_acc = works[0].qty_close
+                    rec.amount_acc = works[0].qty_close * rec.price
+                else:
+                    rec.qty_acc = 0
+                    rec.amount_acc = 0
+            else:
+                rec.amount_acc = sum( rec.child_ids.mapped('amount_acc') )
+
+
     @api.multi
     @api.depends('is_leaf','qty','price','child_ids.amount')
     def _compute_amount(self):
@@ -111,7 +138,7 @@ class TaskDaywork(models.Model):
 
 
     @api.multi
-    @api.depends('qty','last_daywork_id','task_id')
+    @api.depends('qty','last_daywork_id.qty_close')
     def _compute_qty(self):
         for rec in self:
             if rec.last_daywork_id:
