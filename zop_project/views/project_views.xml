@@ -6,29 +6,6 @@
             sequence="90" />
 
 
-        <record model="ir.actions.act_window" id="action_daywork_list">
-            <field name="name">Dayworks</field>
-            <field name="res_model">project.task.daywork</field>
-            <field name="view_type">form</field>
-            <field name="view_mode">tree,form</field>
-            <field name="help" type="html">
-                <p class="oe_view_nocontent_create">Create a daywork
-                </p>
-            </field>
-        </record>
-
-
-
-
-        <menuitem id="menu_project_schedule_daywork" 
-            name="Dayworks" 
-            parent="menu_project_schedule"
-            sequence="80" 
-            action="action_daywork_list" />
-
-
-
-
         <record id="project_tree" model="ir.ui.view">
             <field name="name">project.project.tree</field>
             <field name="model">project.project</field>
@@ -49,7 +26,7 @@
             <field name="name">project.project.form</field>
             <field name="model">project.project</field>
             <field name="arch" type="xml">
-                <form string="Game Team Player">
+                <form string="Task">
                     <group col="4">
                         <field name="name"/>
                         <field name="partner_id"/>
@@ -97,8 +74,104 @@
 
 
 
+        <record id="task_tree" model="ir.ui.view">
+            <field name="name">project.task.tree</field>
+            <field name="model">project.task</field>
+            <field name="arch" type="xml">
+                <tree string="Tasks">
+                    <field name="project_id"/>
+                    <field name="parent_id"/>
+                    <field name="name"/>
+                    <field name="date_start"/>
+                    <field name="date_end"/>
+                    <field name="subtask_count"/>
+                    <field name="child_ids"/>
+                    <field name="uom_id"/>
+                    <field name="qty"/>
+                    <field name="price"/>
+                    <field name="amount"/>
+                    <field name="daywork_ids"/>
+                    <field name="is_leaf"/>
+                    <field name="tag_ids"/>
+                </tree>
+            </field>
+        </record>
 
 
+        <record id="task_form" model="ir.ui.view">
+            <field name="name">project.task.form</field>
+            <field name="model">project.task</field>
+            <field name="arch" type="xml">
+                <form string="Task">
+                    <group col="4">
+                        <field name="name"/>
+                        <field name="date_start"/>
+                        <field name="date_end"/>
+                        <field name="project_id"/>
+                        <field name="parent_id"/>
+                        <field name="child_ids"/>
+                        <field name="subtask_count"/>
+                        <field name="is_leaf"/>
+                        <field name="uom_id"/>
+                        <field name="qty"/>
+                        <field name="price"/>
+                        <field name="amount"/>
+                        <field name="daywork_ids"/>
+                    </group>
+                </form>
+            </field>
+        </record>
+
+        <record model="ir.actions.act_window" id="action_task_list">
+            <field name="name">Tasks</field>
+            <field name="res_model">project.task</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="view_id" ref="task_tree"/>
+            <field name="help" type="html">
+                <p class="oe_view_nocontent_create">Create a Task
+                </p>
+            </field>
+        </record>
+
+        <record id="action_task_list_tree" model="ir.actions.act_window.view">
+            <field eval="1" name="sequence"/>
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="task_tree"/>
+            <field name="act_window_id" ref="action_task_list"/>
+        </record>
+
+        <record id="action_task_list_form" model="ir.actions.act_window.view">
+            <field eval="2" name="sequence"/>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="task_form"/>
+            <field name="act_window_id" ref="action_task_list"/>
+        </record>
+
+
+        <menuitem id="menu_project_schedule_task" 
+            name="Projects" 
+            parent="menu_project_schedule"
+            sequence="10" 
+            action="action_task_list" />
+
+
+        <record model="ir.actions.act_window" id="action_daywork_list">
+            <field name="name">Dayworks</field>
+            <field name="res_model">project.task.daywork</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="help" type="html">
+                <p class="oe_view_nocontent_create">Create a daywork
+                </p>
+            </field>
+        </record>
+
+        <menuitem id="menu_project_schedule_daywork" 
+            name="Dayworks" 
+            parent="menu_project_schedule"
+            sequence="80" 
+            action="action_daywork_list" />
 
 </odoo>
 
