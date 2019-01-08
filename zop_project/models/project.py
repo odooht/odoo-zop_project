@@ -1,0 +1,98 @@
+# -*- coding: utf-8 -*-
+# Part of Odoo. See LICENSE file for full copyright and licensing details.
+
+from odoo import api, fields, models
+
+import logging
+
+_logger = logging.getLogger(__name__)
+
+
+    
+class Project(models.Model):
+    _inherit = "project.project"
+    
+    # inherit from project
+    name = fields.Char("Name", index=True, required=True, track_visibility='onchange')
+    
+    # customer, employer
+    #partner_id = fields.Many2one('res.partner', string='Customer', auto_join=True, track_visibility='onchange')
+    
+    # contractor ?
+    #company_id = fields.Many2one('res.company', string='Company', required=True, default=lambda self: self.env.user.company_id)
+
+    constructor_id = fields.Many2one('res.partner', string='Constructor Company',
+                                     domain=[('is_company','=',True )] )
+    supervisor_id = fields.Many2one('res.partner', string='Supervisor Company',
+                                     domain=[('is_company','=',True )] )
+    designer_id = fields.Many2one('res.partner', string='Designer Company',
+                                     domain=[('is_company','=',True )] )
+    consultor_id = fields.Many2one('res.partner', string='Consultor Company',
+                                     domain=[('is_company','=',True )] )
+    
+class Task(models.Model):
+    _inherit = "project.task"
+    
+    # inherit from project.task
+    #name = fields.Char(string='Title', track_visibility='always', required=True, index=True)
+    #description = fields.Html(string='Description')
+    #tag_ids = fields.Many2many('project.tags', string='Tags', oldname='categ_ids')
+    
+    #date_start = fields.Datetime(string='Starting Date',)
+    #date_end = fields.Datetime(string='Ending Date', index=True, copy=False)
+    #date_deadline = fields.Date(string='Deadline', index=True, copy=False, track_visibility='onchange')
+    #project_id = fields.Many2one('project.project', string='Project',
+    #partner_id = fields.Many2one('res.partner', string='Customer',)
+    #parent_id = fields.Many2one('project.task', string='Parent Task', index=True)
+    #child_ids = fields.One2many('project.task', 'parent_id', string="Sub-tasks", context={'active_test': False})
+    #subtask_count = fields.Integer("Sub-task count", compute='_compute_subtask_count')
+    
+    is_leaf = fields.Boolean()
+    
+    uom_id = fields.Many2one('uom.uom', 'Unit of Measure')
+    qty = fields.Float('Planed Quantity', default=0.0)
+    price = fields.Float('Price', default=0.0 )
+    amount = fields.Float('Planed Amount', default=0.0, compute = '_compute_amount')
+    
+    daywork_ids = fields.One2many('project.task.daywork','task_id',string='Task Dayworks')
+    
+    @api.multi
+    @api.depends('is_leaf','qty','price','child_ids.amount')
+    def _compute_amount(self):
+        for rec in self:
+            if rec.is_leaf:
+                rec.amount = rec.qty * rec.price
+            else:
+                rec.amount = sum( rec.child_ids.mapped('amount') )
+
+    
+    
+
+class TaskDaywork(models.Model):
+    _name = "project.task.daywork"
+    _description = "Project Task Daywork"
+
+    name = fields.Char('Name' )
+    date = fields.Date('Date',required=True,index=True )
+    
+    task_id = fields.Many2one('project.task', 'Last Daywork')
+    last_daywork_id = fields.Many2one('project.task.daywork', 'Last Daywork')
+    qty = fields.Float('Quantity', default=0.0)
+    qty_open = fields.Float('Open Quantity', default=0.0, compute = '_compute_qty')
+    qty_close = fields.Float('Close Quantity', default=0.0, compute = '_compute_qty')
+
+    @api.multi
+    @api.depends('qty','last_daywork_id','task_id')
+    def _compute_qty(self):
+        for rec in self:
+            if rec.last_daywork_id:
+                rec.qty_open = rec.last_daywork_id.qty_close
+                rec.qty_close = rec.last_daywork_id.qty_close + rec.qty
+            else:
+                rec.qty_open = 0
+                rec.qty_close = rec.qty
+
+
+
+
+
