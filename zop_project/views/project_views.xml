@@ -150,7 +150,7 @@
 
 
         <menuitem id="menu_project_schedule_task" 
-            name="Projects" 
+            name="Tasks" 
             parent="menu_project_schedule"
             sequence="10" 
             action="action_task_list" />
@@ -172,6 +172,24 @@
             parent="menu_project_schedule"
             sequence="80" 
             action="action_daywork_list" />
+
+
+        <record id="daywork_tree" model="ir.ui.view">
+            <field name="name">project.task.daywork.tree</field>
+            <field name="model">project.task.daywork</field>
+            <field name="arch" type="xml">
+                <tree string="Dayworks">
+                    <field name="project_id"/>
+                    <field name="task_id"/>
+                    <field name="uom_id"/>
+                    <field name="date"/>
+                    <field name="qty_open"/>
+                    <field name="qty"/>
+                    <field name="qty_close"/>
+                </tree>
+            </field>
+        </record>
+
 
 </odoo>
 
