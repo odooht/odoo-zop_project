@@ -16,7 +16,7 @@ Project Manage.
     'website': 'https://www.odooht.com',
     'depends': ['project', 'uom'],
     'data': [
-        #'security/ir.model.access.csv',
+        'security/ir.model.access.csv',
         'views/project_views.xml',
     ],
     'demo': [
