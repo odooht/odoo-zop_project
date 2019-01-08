@@ -3,8 +3,7 @@
         <menuitem id="menu_project_schedule" 
             name="Schedule Manage" 
             parent="project.menu_main_pm"
-            sequence="90" 
-            groups="project.group_project_manager"/>
+            sequence="90" />
 
 
         <record model="ir.actions.act_window" id="action_daywork_list">
@@ -22,8 +21,7 @@
             name="Dayworks" 
             parent="menu_project_schedule"
             sequence="80" 
-            action="action_daywork_list"
-            groups="project.group_project_manager"/>
+            action="action_daywork_list" />
 
 
 
