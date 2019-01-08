@@ -105,7 +105,7 @@ class TaskDaywork(models.Model):
     @api.depends('project_id','task_id.full_name')
     def _compute_name(self):
         for rec in self:
-            rec.name  = rec.task_id.name + fields.Date.to_string(rec.date)
+            rec.name  = rec.task_id.name + '.' + fields.Date.to_string(rec.date)
             rec.full_name = rec.task_id.full_name + '.' + fields.Date.to_string(rec.date)
 
 
