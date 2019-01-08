@@ -75,7 +75,7 @@ class Task(models.Model):
 
     @api.multi
     @api.depends('amount','rate')
-    def _compute_acc(self):
+    def _compute_rate(self):
         for rec in self:
             rec.rate = ( rec.amount and rec.amount_acc 
                        ) and ( rec.amount_acc / rec.amount ) or 0.0
