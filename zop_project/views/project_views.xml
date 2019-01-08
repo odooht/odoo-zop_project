@@ -85,10 +85,10 @@
                     <field name="date_end"/>
                     <field name="subtask_count"/>
                     <field name="uom_id"/>
-                    <field name="qty"/>
                     <field name="price"/>
-                    <field name="amount"/>
+                    <field name="qty"/>
                     <field name="qty_acc"/>
+                    <field name="amount"/>
                     <field name="amount_acc"/>
                     <field name="rate"/>
                 </tree>
@@ -111,10 +111,10 @@
                         <field name="subtask_count"/>
                         <field name="is_leaf"/>
                         <field name="uom_id"/>
-                        <field name="qty"/>
                         <field name="price"/>
-                        <field name="amount"/>
+                        <field name="qty"/>
                         <field name="qty_acc"/>
+                        <field name="amount"/>
                         <field name="amount_acc"/>
                         <field name="rate"/>
 
