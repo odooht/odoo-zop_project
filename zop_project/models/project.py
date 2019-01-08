@@ -32,6 +32,7 @@ class Project(models.Model):
     
 class Task(models.Model):
     _inherit = "project.task"
+    _rec_name = 'full_name'
     
     # inherit from project.task
     #name = fields.Char(string='Title', track_visibility='always', required=True, index=True)
@@ -46,6 +47,8 @@ class Task(models.Model):
     #parent_id = fields.Many2one('project.task', string='Parent Task', index=True)
     #child_ids = fields.One2many('project.task', 'parent_id', string="Sub-tasks", context={'active_test': False})
     #subtask_count = fields.Integer("Sub-task count", compute='_compute_subtask_count')
+
+    full_name = fields.Char('Name', compute='_compute_name')
     
     is_leaf = fields.Boolean()
     
@@ -55,6 +58,17 @@ class Task(models.Model):
     amount = fields.Float('Planed Amount', default=0.0, compute = '_compute_amount')
     
     daywork_ids = fields.One2many('project.task.daywork','task_id',string='Task Dayworks')
+
+    @api.multi
+    @api.depends('project_id','parent_id.full_name')
+    def _compute_name(self):
+        for rec in self:
+            if parent_id:
+                rec.full_name  = parent_id.full_name + '.' + rec.name
+            else:
+                rec.full_name  = rec.name
+
+
     
     @api.multi
     @api.depends('is_leaf','qty','price','child_ids.amount')
@@ -71,8 +85,10 @@ class Task(models.Model):
 class TaskDaywork(models.Model):
     _name = "project.task.daywork"
     _description = "Project Task Daywork"
+    _rec_name = 'full_name'
 
-    name = fields.Char('Name' )
+    name = fields.Char('Name', compute='_compute_name')
+    full_name = fields.Char('Name', compute='_compute_name')
     date = fields.Date('Date',required=True,index=True )
     
     project_id = fields.Many2one(related='task_id.project_id')
@@ -84,6 +100,14 @@ class TaskDaywork(models.Model):
     qty = fields.Float('Quantity', default=0.0)
     qty_open = fields.Float('Open Quantity', default=0.0, compute = '_compute_qty')
     qty_close = fields.Float('Close Quantity', default=0.0, compute = '_compute_qty')
+
+    @api.multi
+    @api.depends('project_id','task_id.full_name')
+    def _compute_name(self):
+        for rec in self:
+            rec.name  = task_id.name + rec.data
+            rec.full_name = task_id.full_name + '.' + rec.date
+
 
     @api.multi
     @api.depends('qty','last_daywork_id','task_id')
