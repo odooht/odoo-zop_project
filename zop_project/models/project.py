@@ -86,7 +86,7 @@ class Task(models.Model):
     def _compute_acc(self):
         for rec in self:
             if rec.is_leaf:
-                works = rec.daywork_ids.sorted(key='data', reverse=True)
+                works = rec.daywork_ids.sorted(key='date', reverse=True)
                 if works:
                     rec.qty_acc = works[0].qty_close
                     rec.amount_acc = works[0].qty_close * rec.price
