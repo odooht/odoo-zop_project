@@ -2,15 +2,15 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 {
-    'name': 'OdooHT Project manage',
+    'name': 'Project Schdule Manage',
     'version': '1.0',
     'category': 'Project',
-    'summary': 'Project Manage',
+    'summary': 'Project Schdule Manage',
     'description': """
-This module is for Project Manage.
+This module is for Project Schdule Manage.
 ===========================================================================
 
-Project Manage.
+Project Schdule Manage.
     """,
     'author': 'Beijing OdooHT Co. LTD.',
     'website': 'https://www.odooht.com',

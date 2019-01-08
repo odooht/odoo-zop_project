@@ -57,7 +57,7 @@ class Task(models.Model):
     price = fields.Float('Price', default=0.0 )
     amount = fields.Float('Planed Amount', default=0.0, compute = '_compute_amount')
 
-    qty_acc = fields.Float('Accumulate Amount', default=0.0, compute = '_compute_acc')
+    qty_acc = fields.Float('Accumulate Quantity', default=0.0, compute = '_compute_acc')
     amount_acc = fields.Float('Accumulate Amount', default=0.0, compute = '_compute_acc')
     
     rate = fields.Float('Rate', default=0.0, compute = '_compute_rate' )
