@@ -63,8 +63,8 @@ class Task(models.Model):
     @api.depends('project_id','parent_id.full_name')
     def _compute_name(self):
         for rec in self:
-            if parent_id:
-                rec.full_name  = parent_id.full_name + '.' + rec.name
+            if rec.parent_id:
+                rec.full_name  = rec.parent_id.full_name + '.' + rec.name
             else:
                 rec.full_name  = rec.name
 
@@ -105,8 +105,8 @@ class TaskDaywork(models.Model):
     @api.depends('project_id','task_id.full_name')
     def _compute_name(self):
         for rec in self:
-            rec.name  = task_id.name + rec.data
-            rec.full_name = task_id.full_name + '.' + rec.date
+            rec.name  = rec.task_id.name + rec.data
+            rec.full_name = rec.task_id.full_name + '.' + rec.date
 
 
     @api.multi
