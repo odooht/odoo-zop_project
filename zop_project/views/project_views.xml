@@ -105,13 +105,15 @@
                         <field name="date_end"/>
                         <field name="project_id"/>
                         <field name="parent_id"/>
-                        <field name="child_ids"/>
                         <field name="subtask_count"/>
                         <field name="is_leaf"/>
                         <field name="uom_id"/>
                         <field name="qty"/>
                         <field name="price"/>
                         <field name="amount"/>
+                    </group>
+                    <group col="2">
+                        <field name="child_ids"/>
                         <field name="daywork_ids"/>
                     </group>
                 </form>
