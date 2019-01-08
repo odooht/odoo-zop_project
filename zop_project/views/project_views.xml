@@ -2,7 +2,7 @@
 <odoo>
         <menuitem id="menu_project_schedule" 
             name="Schedule Manage" 
-            parent="menu_main_pm"
+            parent="project.menu_main_pm"
             sequence="90" 
             groups="project.group_project_manager"/>
 
