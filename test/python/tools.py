@@ -412,6 +412,54 @@ def find(model, domain, record=None ):
     execute(usid, model, 'write', id, record )
     return id
 
-#pid = project_one()
+
+def task2_one(rec):
+    rec = rec.copy()
+    rec['project_id'] = project_id
+
+    uom = rec.get('uom_id')
+    if uom:
+        uom_id = search_one('product.uom', [('name','=',uom  )])
+        rec['uom_id'] = uom_id
+    
+    #ss = rec['code'].split('.')
+    #print rec['code'], ss, '.'.join(ss[0:-1]), rec.get('uom_id')
+    #print rec
+    
+    model = 'project.task'
+    domain = [('code','=',rec['code']),('project_id','=',project_id) ]
+    id = find(model, domain, record=rec )
+    print id
+    if id:
+        #print execute(usid, model, 'read', id)
+        pass
+
+
+def task2_one_parent(rec):
+    rec = rec.copy()
+    rec['project_id'] = project_id
+    ss = rec['code'].split('.')
+    print rec['code'], ss, '.'.join(ss[0:-1])
+    
+    model = 'project.task'
+    domain = [('code','=',rec['code']),('project_id','=',project_id) ]
+    id = 0 # find(model, domain, record=rec )
+    print id
+    if id:
+        print execute(usid, model, 'read', id)
+        pass
+
+
+def task2_multi():
+    for rec in records['project.task']:
+        task2_one(rec)
+        
+    #for rec in records['project.task']:
+    #    task2_one_parent(rec)
+
+
+project_id = project_one()
 #print 'ppid=',pid
+#task1_multi()
+task2_multi()
 

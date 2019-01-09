@@ -4,8 +4,8 @@
 import requests
 import json
 
-HOST = 'http://192.168.56.103:8069'
-SERVER = 'T_project'
+HOST = 'http://192.168.56.105:8069'
+SERVER = 'TT'
 
 URI_LOGIN = HOST + '/json/user/login'
 #URI_LOGIN = HOST + '/web/session/authenticate'
@@ -87,10 +87,8 @@ class UserSudo(object):
     def login(self,user,psw,db=SERVER):
         """  check ok uid
         """
-        #result = jsonrpc(URI_LOGIN, {'db': db,'login':user, 'password':psw, 'type':'account'} )
-        result = jsonrpc(URI_LOGIN, {'db': db,'login':user, 'password':psw } )
-        
-        print '2131313', result
+        result = jsonrpc(URI_LOGIN, {'db': db,'login':user, 'password':psw, 'type':'account'} )
+        #result = jsonrpc(URI_LOGIN, {'db': db,'login':user, 'password':psw } )
         
         return result
         #return result.get('sid',None)
@@ -112,13 +110,13 @@ class UserSudo(object):
 def get_user():
     print('usid')
     result = UserSudo().login('admin','123')
-    usid = result.get('session_id',None)
+    usid = result.get('sid',None)
     print(usid)
 
     uid = result.get('uid',None)
     print(uid, type(uid) )
 
-    UserSudo().logout()
+    #UserSudo().logout()
 
     
     return usid, uid

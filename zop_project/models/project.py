@@ -55,7 +55,7 @@ class Task(models.Model):
     
     is_leaf = fields.Boolean()
     
-    uom_id = fields.Many2one('uom.uom', 'Unit of Measure')
+    uom_id = fields.Many2one('product.uom', 'Unit of Measure')
     qty = fields.Float('Planed Quantity', default=0.0)
     price = fields.Float('Price', default=0.0 )
     amount = fields.Float('Planed Amount', default=0.0, compute = '_compute_amount')
