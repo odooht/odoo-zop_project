@@ -14,7 +14,7 @@ Project Schdule Manage.
     """,
     'author': 'Beijing OdooHT Co. LTD.',
     'website': 'https://www.odooht.com',
-    'depends': ['project', 'uom'],
+    'depends': ['project', 'product'],
     'data': [
         'security/ir.model.access.csv',
         'views/project_views.xml',
