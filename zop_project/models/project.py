@@ -21,6 +21,8 @@ class Project(models.Model):
     # contractor ?
     #company_id = fields.Many2one('res.company', string='Company', required=True, default=lambda self: self.env.user.company_id)
 
+    code = fields.Char("Code", index=True, required=True)
+
     constructor_id = fields.Many2one('res.partner', string='Constructor Company',
                                      domain=[('is_company','=',True )] )
     supervisor_id = fields.Many2one('res.partner', string='Supervisor Company',
@@ -48,6 +50,7 @@ class Task(models.Model):
     #child_ids = fields.One2many('project.task', 'parent_id', string="Sub-tasks", context={'active_test': False})
     #subtask_count = fields.Integer("Sub-task count", compute='_compute_subtask_count')
 
+    code = fields.Char("Code", index=True, required=True)
     full_name = fields.Char('Name', compute='_compute_name')
     
     is_leaf = fields.Boolean()
