@@ -35,6 +35,7 @@ class Project(models.Model):
 class Task(models.Model):
     _inherit = "project.task"
     _rec_name = 'full_name'
+    _order = 'code'
     
     # inherit from project.task
     #name = fields.Char(string='Title', track_visibility='always', required=True, index=True)

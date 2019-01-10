@@ -422,10 +422,6 @@ def task2_one(rec):
         uom_id = search_one('product.uom', [('name','=',uom  )])
         rec['uom_id'] = uom_id
     
-    #ss = rec['code'].split('.')
-    #print rec['code'], ss, '.'.join(ss[0:-1]), rec.get('uom_id')
-    #print rec
-    
     model = 'project.task'
     domain = [('code','=',rec['code']),('project_id','=',project_id) ]
     id = find(model, domain, record=rec )
@@ -439,27 +435,35 @@ def task2_one_parent(rec):
     rec = rec.copy()
     rec['project_id'] = project_id
     ss = rec['code'].split('.')
-    print rec['code'], ss, '.'.join(ss[0:-1])
     
+    pcode = '.'.join(ss[0:-1])
+    
+    nrec = {}
+    
+    if pcode:
+        uom_id = search_one('project.task', [('code','=',pcode),('project_id','=',project_id) ])
+        nrec['parent_id'] = uom_id
+    
+    #print pcode, rec['code'],nrec
     model = 'project.task'
     domain = [('code','=',rec['code']),('project_id','=',project_id) ]
-    id = 0 # find(model, domain, record=rec )
+    id = find(model, domain, record=nrec )
     print id
     if id:
-        print execute(usid, model, 'read', id)
+        #print execute(usid, model, 'read', id)
         pass
 
 
 def task2_multi():
     for rec in records['project.task']:
         task2_one(rec)
-        
-    #for rec in records['project.task']:
-    #    task2_one_parent(rec)
+
+def task2_multi_parent():
+    for rec in records['project.task']:
+        task2_one_parent(rec)
 
 
 project_id = project_one()
-#print 'ppid=',pid
-#task1_multi()
 task2_multi()
+task2_multi_parent()
 
