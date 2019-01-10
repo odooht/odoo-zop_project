@@ -137,8 +137,10 @@ class TaskDaywork(models.Model):
     def _compute_name(self):
         for rec in self:
             if rec.task_id:
-                rec.name  = rec.task_id.name + '.' + fields.Date.to_string(rec.date)
-                rec.full_name = rec.task_id.full_name + '.' + fields.Date.to_string(rec.date)
+                #rec.name  = rec.task_id.name + '.' + fields.Date.to_string(rec.date)
+                #rec.full_name = rec.task_id.full_name + '.' + fields.Date.to_string(rec.date)
+                rec.name  = rec.task_id.name + '.' + rec.date
+                rec.full_name = rec.task_id.full_name + '.' + rec.date
 
 
     @api.multi
