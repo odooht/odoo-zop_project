@@ -139,8 +139,58 @@ class TaskDaywork(models.Model):
     qty_close = fields.Float('Close Quantity', default=0.0 )
 
     @api.multi
-    @api.depends('task_id.full_name', 'task_id.name', 'date')
-    @api.onchange('task_id.full_name', 'task_id.name', 'date')
+    def write(self, vals):
+        date = vals.get('date')
+        if date:
+            vals['name'] = self.task_id.name + '.' + date
+            vals['full_name'] = self.task_id.full_name + '.' + date
+
+        qty = vals.get('qty',None)
+        last_daywork_id = vals.get('last_daywork_id',None)
+
+        if last_daywork_id:
+            qty_open = self.last_daywork_id.browse(last_daywork_id).qty_close
+            vals['qty_open'] = qty_open
+            
+            if qty != None:
+                qty1 = qty
+            else:
+                qty1 = self.qty
+            
+            vals['qty_close'] = qty_open + qty1
+        
+        else if qty != None:
+            vals['qty_close'] = self.qty_open + qty
+        
+        return super(TaskDaywork, self).write(vals)
+        
+    
+    @api.model
+    def create(self, vals):
+        date = vals.get('date','')
+        task_id = vals.get('task_id')
+        if task_id:
+            task = self.task_id.browse(task_id)
+            vals['name'] = task.name + '.' + date
+            vals['full_name'] = task.full_name + '.' + date
+
+        qty = vals.get('qty',0)
+        last_daywork_id = vals.get('last_daywork_id',None)
+        
+        qty_open = 0
+        if last_daywork_id:
+            qty_open = self.last_daywork_id.browse(last_daywork_id).qty_close
+
+        vals['qty_open'] = qty_open
+        vals['qty_close'] = qty_open + qty
+        
+
+        return super(TaskDaywork, self).create(vals)
+
+""" 
+    #@api.multi
+    #@api.depends('task_id.full_name', 'task_id.name', 'date')
+    #@api.onchange('task_id.full_name', 'task_id.name', 'date')
     def _compute_name(self):
         for rec in self:
             if rec.task_id.name and rec.date:
@@ -170,22 +220,4 @@ class TaskDaywork(models.Model):
         
         if date != None or task_id != None:
             self._compute_name()
-
-
-""" 
-    @api.multi
-    def write(self, vals):
-        ret = super(TaskDaywork, self).write(vals)
-        self._update_compute(vals)
-        return ret
-        
-    
-    @api.model
-    def create(self, vals):
-        ret = super(TaskDaywork, self).create(vals)
-        self._update_compute(vals)
-        return ret
-
-
 """
-
