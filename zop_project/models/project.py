@@ -95,7 +95,7 @@ class Task(models.Model):
         if qty != None or price != None:
             qty1 = ( qty != None and [qty] or [self.qty] )[0]
             price1 = ( price != None and [price] or [self.price] )[0]
-            vals['amount'] = qry1 * price1
+            vals['amount'] = qty1 * price1
             
         if parent_id:
             # recompute parent amount
@@ -118,7 +118,7 @@ class Task(models.Model):
 
         qty = vals.get('qty',0)
         price = vals.get('price', 0)
-        vals['amount'] = qry * price
+        vals['amount'] = qty * price
             
         if parent_id:
             # recompute parent amount
