@@ -80,7 +80,7 @@ class Task(models.Model):
         full_name = vals.get('full_name', None)
         parent_id = vals.get('parent_id')
         
-        if not full_name and name != None:
+        if not full_name and ( name != None or not parent_id ):
             if parent_id:
                 vals['full_name'] = self.parent_id.browse(parent_id).full_name + '.' + name
             elif self.parent_id:
