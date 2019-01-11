@@ -58,22 +58,78 @@ class Task(models.Model):
     #subtask_count = fields.Integer("Sub-task count", compute='_compute_subtask_count')
 
     code = fields.Char("Code", index=True, required=True)
-    full_name = fields.Char('Name', compute='_compute_name', store=True)
+    full_name = fields.Char('Name')
     
     is_leaf = fields.Boolean()
     
     uom_id = fields.Many2one('uom.uom', 'Unit of Measure')
     qty = fields.Float('Planed Quantity', default=0.0)
     price = fields.Float('Price', default=0.0 )
-    amount = fields.Float('Planed Amount', default=0.0, compute = '_compute_amount', store=True)
+    amount = fields.Float('Planed Amount', default=0.0)
 
-    qty_acc = fields.Float('Accumulate Quantity', default=0.0, compute = '_compute_acc', store=True)
-    amount_acc = fields.Float('Accumulate Amount', default=0.0, compute = '_compute_acc', store=True)
+    qty_acc = fields.Float('Accumulate Quantity', default=0.0)
+    amount_acc = fields.Float('Accumulate Amount', default=0.0)
     
-    rate = fields.Float('Rate', default=0.0, compute = '_compute_rate', store=True )
+    rate = fields.Float('Rate', default=0.0  )
     
     daywork_ids = fields.One2many('project.task.daywork','task_id',string='Task Dayworks')
 
+    @api.multi
+    def write(self, vals):
+        name = vals.get('name',None)
+        full_name = vals.get('full_name', None)
+        parent_id = vals.get('parent_id')
+        
+        if not full_name and name != None:
+            if parent_id:
+                vals['full_name'] = self.parent_id.browse(parent_id).full_name + '.' + name
+            elif self.parent_id:
+                vals['full_name'] = self.parent_id.full_name + '.' + name
+            else:
+                vals['full_name'] = name
+
+        
+        qty = vals.get('qty',None)
+        price = vals.get('price', None)
+        
+        if qty != None or price != None:
+            qty1 = ( qty != None and [qty] or [self.qty] )[0]
+            price1 = ( price != None and [price] or [self.price] )[0]
+            vals['amount'] = qry1 * price1
+            
+        if parent_id:
+            # recompute parent amount
+            pass
+            
+        return super(Task, self).write(vals)
+        
+    
+    @api.model
+    def create(self, vals):
+        name = vals.get('name','')
+        full_name = vals.get('full_name', None)
+        parent_id = vals.get('parent_id')
+        
+        if not full_name and name != None:
+            if parent_id:
+                vals['full_name'] = self.parent_id.browse(parent_id).full_name + '.' + name
+            else:
+                vals['full_name'] = name
+
+        qty = vals.get('qty',0)
+        price = vals.get('price', 0)
+        vals['amount'] = qry * price
+            
+        if parent_id:
+            # recompute parent amount
+            pass
+
+
+        return super(Task, self).create(vals)
+
+
+
+""" 
     @api.multi
     @api.depends('project_id','parent_id.full_name')
     def _compute_name(self):
@@ -116,7 +172,7 @@ class Task(models.Model):
             else:
                 rec.amount = sum( rec.child_ids.mapped('amount') )
 
-    
+"""    
     
 
 class TaskDaywork(models.Model):
@@ -187,37 +243,3 @@ class TaskDaywork(models.Model):
 
         return super(TaskDaywork, self).create(vals)
 
-""" 
-    #@api.multi
-    #@api.depends('task_id.full_name', 'task_id.name', 'date')
-    #@api.onchange('task_id.full_name', 'task_id.name', 'date')
-    def _compute_name(self):
-        for rec in self:
-            if rec.task_id.name and rec.date:
-                rec.name  = rec.task_id.name + '.' + fields.Date.to_string(rec.date)
-            if rec.task_id.full_name and rec.date:
-                rec.full_name = rec.task_id.full_name + '.' + fields.Date.to_string(rec.date)
-
-
-    @api.multi
-    @api.depends('qty','last_daywork_id.qty_close')
-    @api.onchange('last_daywork_id.qty_close', 'qty')
-    def _compute_qty(self):
-        for rec in self:
-            if rec.last_daywork_id:
-                rec.qty_open = rec.last_daywork_id.qty_close
-            rec.qty_close = rec.qty_open + rec.qty
-                
-    def _update_compute(self, vals):
-        qty = vals.get('qty')
-        last_daywork_id = vals.get('last_daywork_id')
-        
-        if qty != None or last_daywork_id != None:
-            self._compute_qty()
-
-        date = vals.get('date')
-        task_id = vals.get('task_id')
-        
-        if date != None or task_id != None:
-            self._compute_name()
-"""
