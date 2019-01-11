@@ -6,18 +6,12 @@ import json
 
 HOST = 'http://192.168.56.105:8069'
 SERVER = 'TT'
+    
+HOST = 'http://192.168.56.103:8069'
+SERVER = 'T_project'
 
 URI_LOGIN = HOST + '/json/user/login'
-#URI_LOGIN = HOST + '/web/session/authenticate'
 URI_LOGOUT = HOST + '/web/session/destroy'
-
-
-
-
-URI_REGISTER = HOST + '/json/user/register'
-URI_RESET_PASSWORD = HOST + '/json/user/reset/password'
-
-
 URI_API       = HOST + '/json/api'
 
 
@@ -110,6 +104,9 @@ class UserSudo(object):
 def get_user():
     print('usid')
     result = UserSudo().login('admin','123')
+    
+    print result
+    
     usid = result.get('sid',None)
     print(usid)
 
@@ -118,6 +115,35 @@ def get_user():
 
     #UserSudo().logout()
 
-    
+
     return usid, uid
 
+if __name__ == '__main__':
+    HOST = 'http://192.168.56.105:8069'
+    SERVER = 'TT'
+    HOST = 'http://192.168.56.103:8069'
+    SERVER = 'T_project'
+
+    #url = HOST + '/web/session/authenticate'
+    url = HOST + '/json/user/login'
+
+    user = 'admin'
+    psw = '123'
+    result = jsonrpc(url, {'db': SERVER,'login':user, 'password':psw } )
+
+    print 'login:',result
+    
+    sid = result.get('session_id')
+    print 'sid:',sid
+
+    url = HOST + '/json/api'
+    ptn = jsonrpc(url,{'model':'res.partner', 'method': 'search', 'args': [[]], 'kwargs': {}},sid=sid )
+    print ptn
+    
+    
+    url = HOST + '/web/session/modules'
+    ptn = jsonrpc(url,{},sid=sid )
+    print 'modules:',ptn
+    
+    
+    
