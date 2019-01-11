@@ -138,16 +138,17 @@ class TaskDaywork(models.Model):
     qty_open = fields.Float('Open Quantity', default=0.0  )
     qty_close = fields.Float('Close Quantity', default=0.0 )
 
-    #@api.multi
-    #@api.depends('task_id.full_name', 'date')
+    @api.multi
+    @api.depends('task_id.full_name', 'date')
+    @api.onchange('task_id.full_name', 'date')
     def _compute_name(self):
         for rec in self:
             rec.name  = rec.task_id.name + '.' + fields.Date.to_string(rec.date)
             rec.full_name = rec.task_id.full_name + '.' + fields.Date.to_string(rec.date)
 
 
-    #@api.multi
-    #@api.depends('qty','last_daywork_id.qty_close')
+    @api.multi
+    @api.depends('qty','last_daywork_id.qty_close')
     @api.onchange('last_daywork_id.qty_close', 'qty')
     def _compute_qty(self):
         for rec in self:
