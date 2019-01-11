@@ -124,8 +124,8 @@ class TaskDaywork(models.Model):
     _description = "Project Task Daywork"
     _rec_name = 'full_name'
 
-    name = fields.Char('Name', compute='_compute_name', store=True)
-    full_name = fields.Char('Name', compute='_compute_name', store=True)
+    name = fields.Char('Name' )
+    full_name = fields.Char('Name' )
     date = fields.Date('Date',required=True,index=True )
     
     project_id = fields.Many2one(related='task_id.project_id')
@@ -135,31 +135,49 @@ class TaskDaywork(models.Model):
 
     last_daywork_id = fields.Many2one('project.task.daywork', 'Last Daywork')
     qty = fields.Float('Quantity', default=0.0)
-    qty_open = fields.Float('Open Quantity', default=0.0, compute = '_compute_qty', store=True)
-    qty_close = fields.Float('Close Quantity', default=0.0, compute = '_compute_qty', store=True)
+    qty_open = fields.Float('Open Quantity', default=0.0  )
+    qty_close = fields.Float('Close Quantity', default=0.0 )
 
-    @api.multi
-    @api.depends('task_id.full_name')
+    #@api.multi
+    #@api.depends('task_id.full_name', 'date')
     def _compute_name(self):
-        for rec in self:
-            if rec.task_id:
-                rec.name  = rec.task_id.name + '.' + fields.Date.to_string(rec.date)
-                rec.full_name = rec.task_id.full_name + '.' + fields.Date.to_string(rec.date)
-                #rec.name  = rec.task_id.name + '.' + rec.date
-                #rec.full_name = rec.task_id.full_name + '.' + rec.date
+        self.name  = self.task_id.name + '.' + fields.Date.to_string(self.date)
+        self.full_name = self.task_id.full_name + '.' + fields.Date.to_string(self.date)
+
+
+    #@api.multi
+    #@api.depends('qty','last_daywork_id.qty_close')
+    def _compute_qty(self):
+        if self.last_daywork_id:
+            self.qty_open = self.last_daywork_id.qty_close
+        self.qty_close = self.qty_open + self.qty
+                
+    def _update_compute(self, vals):
+        qty = vals.get('qty')
+        last_daywork_id = vals.get('last_daywork_id')
+        
+        if qty != None or last_daywork_id != None:
+            self._compute_qty()
+
+        date = vals.get('date')
+        task_id = vals.get('task_id')
+        
+        if date != None or task_id != None:
+            self._compute_name()
 
 
     @api.multi
-    @api.depends('qty','last_daywork_id.qty_close')
-    def _compute_qty(self):
-        for rec in self:
-            if rec.last_daywork_id:
-                rec.qty_open = rec.last_daywork_id.qty_close
-                rec.qty_close = rec.last_daywork_id.qty_close + rec.qty
-            else:
-                rec.qty_open = 0
-                rec.qty_close = rec.qty
-
+    def write(self, vals):
+        ret = super(TaskDaywork, self).write(vals)
+        self._update_compute(vals)
+        return ret
+        
+    
+    @api.model
+    def create(self, vals):
+        ret = super(TaskDaywork, self).create(vals)
+        self._update_compute(vals)
+        return ret
 
 
 
