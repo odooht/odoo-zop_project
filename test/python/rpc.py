@@ -103,20 +103,26 @@ class UserSudo(object):
 
 def get_user():
     print('usid')
-    result = UserSudo().login('admin','123')
+    #result = UserSudo().login('admin','123')
+    #print result
+
+    user = 'admin'
+    psw = '123'
+    result = jsonrpc(URI_LOGIN, {'db': SERVER,'login':user, 'password':psw } )
+
+    print 'login:',result
     
-    print result
+    sid = result.get('session_id')
+    print 'sid:',sid
     
-    usid = result.get('sid',None)
-    print(usid)
+    #usid = result.get('sid',None)
+    #print(usid)
 
     uid = result.get('uid',None)
     print(uid, type(uid) )
 
-    #UserSudo().logout()
 
-
-    return usid, uid
+    return sid, uid
 
 if __name__ == '__main__':
     HOST = 'http://192.168.56.105:8069'

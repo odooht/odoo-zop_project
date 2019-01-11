@@ -419,7 +419,7 @@ def task2_one(rec):
 
     uom = rec.get('uom_id')
     if uom:
-        uom_id = search_one('product.uom', [('name','=',uom  )])
+        uom_id = search_one('uom.uom', [('name','=',uom  )])
         rec['uom_id'] = uom_id
     
     model = 'project.task'
