@@ -14,6 +14,12 @@ class Project(models.Model):
     
     # inherit from project
     #name = fields.Char("Name", index=True, required=True, track_visibility='onchange')
+
+    #tasks = fields.One2many('project.task', 'project_id', string="Task Activities")
+    #user_id = fields.Many2one('res.users', string='Project Manager', default=lambda self: self.env.user, track_visibility="onchange")
+    #date_start = fields.Date(string='Start Date')
+    #date = fields.Date(string='Expiration Date', index=True, track_visibility='onchange')
+
     
     # customer, employer
     #partner_id = fields.Many2one('res.partner', string='Customer', auto_join=True, track_visibility='onchange')
@@ -52,19 +58,19 @@ class Task(models.Model):
     #subtask_count = fields.Integer("Sub-task count", compute='_compute_subtask_count')
 
     code = fields.Char("Code", index=True, required=True)
-    full_name = fields.Char('Name', compute='_compute_name')
+    full_name = fields.Char('Name', compute='_compute_name', store=True)
     
     is_leaf = fields.Boolean()
     
     uom_id = fields.Many2one('uom.uom', 'Unit of Measure')
     qty = fields.Float('Planed Quantity', default=0.0)
     price = fields.Float('Price', default=0.0 )
-    amount = fields.Float('Planed Amount', default=0.0, compute = '_compute_amount')
+    amount = fields.Float('Planed Amount', default=0.0, compute = '_compute_amount', store=True)
 
-    qty_acc = fields.Float('Accumulate Quantity', default=0.0, compute = '_compute_acc')
-    amount_acc = fields.Float('Accumulate Amount', default=0.0, compute = '_compute_acc')
+    qty_acc = fields.Float('Accumulate Quantity', default=0.0, compute = '_compute_acc', store=True)
+    amount_acc = fields.Float('Accumulate Amount', default=0.0, compute = '_compute_acc', store=True)
     
-    rate = fields.Float('Rate', default=0.0, compute = '_compute_rate' )
+    rate = fields.Float('Rate', default=0.0, compute = '_compute_rate', store=True )
     
     daywork_ids = fields.One2many('project.task.daywork','task_id',string='Task Dayworks')
 
@@ -118,8 +124,8 @@ class TaskDaywork(models.Model):
     _description = "Project Task Daywork"
     _rec_name = 'full_name'
 
-    name = fields.Char('Name', compute='_compute_name')
-    full_name = fields.Char('Name', compute='_compute_name')
+    name = fields.Char('Name', compute='_compute_name', store=True)
+    full_name = fields.Char('Name', compute='_compute_name', store=True)
     date = fields.Date('Date',required=True,index=True )
     
     project_id = fields.Many2one(related='task_id.project_id')
@@ -129,8 +135,8 @@ class TaskDaywork(models.Model):
 
     last_daywork_id = fields.Many2one('project.task.daywork', 'Last Daywork')
     qty = fields.Float('Quantity', default=0.0)
-    qty_open = fields.Float('Open Quantity', default=0.0, compute = '_compute_qty')
-    qty_close = fields.Float('Close Quantity', default=0.0, compute = '_compute_qty')
+    qty_open = fields.Float('Open Quantity', default=0.0, compute = '_compute_qty', store=True)
+    qty_close = fields.Float('Close Quantity', default=0.0, compute = '_compute_qty', store=True)
 
     @api.multi
     @api.depends('task_id.full_name')
