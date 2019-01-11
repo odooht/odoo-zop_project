@@ -159,7 +159,7 @@ class TaskDaywork(models.Model):
             
             vals['qty_close'] = qty_open + qty1
         
-        else if qty != None:
+        elif qty != None:
             vals['qty_close'] = self.qty_open + qty
         
         return super(TaskDaywork, self).write(vals)
