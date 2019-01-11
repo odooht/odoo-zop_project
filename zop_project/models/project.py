@@ -148,6 +148,7 @@ class TaskDaywork(models.Model):
 
     #@api.multi
     #@api.depends('qty','last_daywork_id.qty_close')
+    @api.onchange('last_daywork_id.qty_close', 'qty')
     def _compute_qty(self):
         for rec in self:
             if rec.last_daywork_id:
@@ -168,6 +169,7 @@ class TaskDaywork(models.Model):
             self._compute_name()
 
 
+""" 
     @api.multi
     def write(self, vals):
         ret = super(TaskDaywork, self).write(vals)
@@ -182,5 +184,5 @@ class TaskDaywork(models.Model):
         return ret
 
 
-
+"""
 
