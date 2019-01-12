@@ -65,15 +65,56 @@ class Task(models.Model):
     uom_id = fields.Many2one('uom.uom', 'Unit of Measure')
     qty = fields.Float('Planed Quantity', default=0.0)
     price = fields.Float('Price', default=0.0 )
-    amount = fields.Float('Planed Amount', default=0.0)
+    amount_me = fields.Float('Planed Amount by Me', default=0.0, compute='_compute_amount_me')
+    amount_childs = fields.Float('Planed Amount by Childs', default=0.0)
+    amount = fields.Float('Planed Amount', default=0.0, compute='_compute_amount')
 
-    qty_acc = fields.Float('Accumulate Quantity', default=0.0)
-    amount_acc = fields.Float('Accumulate Amount', default=0.0)
-    
-    rate = fields.Float('Rate', default=0.0  )
-    
     daywork_ids = fields.One2many('project.task.daywork','task_id',string='Task Dayworks')
     
+    last_daywork_id = fields.Many2one('project.task.daywork', string='Last Daywork')
+    
+    qty_acc_me = fields.Float('Accumulate Quantity by Me', default=0.0, related='last_daywork_id.qty_close' )
+    amount_acc_me = fields.Float('Accumulate Amount by Me', default=0.0,compute='_compute_amount_acc_me' )
+    amount_acc_childs = fields.Float('Accumulate Amount by childs', default=0.0 )
+    amount_acc = fields.Float('Accumulate Amount', default=0.0,compute='_compute_amount_acc' )
+    rate = fields.Float('Rate', default=0.0, compute='_compute_rate'  )
+
+    @api.multi
+    @api.depends('qty','price')
+    def _compute_amount_me(self):
+        for rec in self:
+            rec.amount_me = rec.qty * rec.price
+    
+    @api.multi
+    @api.depends('amount_me','is_leaf','amount_childs')
+    def _compute_amount(self):
+        for rec in self:
+            if rec.is_leaf:
+                rec.amount = rec.amount_me
+            else:
+                rec.amount = rec.amount_childs
+    
+    @api.multi
+    @api.depends('qty','price')
+    def _compute_amount_acc_me(self):
+        for rec in self:
+            rec.amount_acc_me = rec.qty_acc_me * rec.price
+    
+    @api.multi
+    @api.depends('amount_me','is_leaf','amount_childs')
+    def _compute_amount_acc(self):
+        for rec in self:
+            if rec.is_leaf:
+                rec.amount_acc = rec.amount_acc_me
+            else:
+                rec.amount_acc = rec.amount_acc_childs
+    
+    @api.multi
+    @api.depends('amount','qty_acc','price')
+    def _compute_rate(self):
+        for rec in self:
+            rec.rate = ( rec.amount and rec.amount_acc 
+                       ) and ( rec.amount_acc / rec.amount ) or 0.0
     
     def _set_full_name(self):
         if self.parent_id:
@@ -81,117 +122,42 @@ class Task(models.Model):
         else:
             self.full_name = self.name
 
-    
-    def _set_amount(self):
-        if self.is_leaf:
-            self.amount = self.qty * self.price
-        else:
-            self.amount =  sum( self.child_ids.mapped('amount') )
+    def _set_amount_childs(self):
+        self.amount_childs =  sum( self.child_ids.mapped('amount') )
+        if self.parent_id:
+            self.parent_id._set_amount_childs()
 
     @api.multi
     def write(self, vals):
         old_parent_id = self.parent_id.id
+        old_amount = self.amount
+        
         ret = super(Task, self).write(vals)
+        
         if not vals.get('full_name'):
             if vals.get('parent_id') or vals.get('name'):
                 self._set_full_name()
         
-        todo = 0
-        
-        if vals.get('qty') != None  or vals.get('price') != None:
-            if self.is_leaf:
-                self._set_amount()
-                todo = 1
-        
-        if vals.get('parent_id'):
+        if self.parent_id.id != old_parent_id:
             if old_parent_id:
-                if old_parent_id != vals.get('parent_id'):
-                    self.browse(old_parent_id)._set_amount()
-                    todo = 1
-            else:
-                todo = 1
-            
-        if todo and self.parent_id:
-            self.parent_id._set_amount()
-        
+                self.browse(old_parent_id)._set_amount_childs()
+
+        if self.parent_id.id != old_parent_id or self.amount != old_amount:
+            if self.parent_id:
+                self.parent_id._set_amount_childs()
+
         return ret
 
-    """ 
-    def write2(self, vals):
-        name = vals.get('name',None)
-        full_name = vals.get('full_name', None)
-        parent_id = vals.get('parent_id')
-        
-        old_parent = self.parent_id
-        if not full_name and ( parent_id or name ):
-            fname = []
-            if parent_id:
-                fname.append( self.parent_id.browse(parent_id).full_name )
-            elif old_parent:
-                fname.append( old_parent.full_name )
-        
-            fname.append( name and name or self.name )
-            vals['full_name'] = '.'.join(fname)
-            
-        qty = vals.get('qty',None)
-        price = vals.get('price', None)
-        
-        if qty != None or price != None:
-            qty1 = ( qty != None and [qty] or [self.qty] )[0]
-            price1 = ( price != None and [price] or [self.price] )[0]
-            vals['amount'] = qty1 * price1
-            
-        if parent_id:
-            # recompute parent amount
-            pass
-            
-        return super(Task, self).write(vals)
-    """
-    
     @api.model
     def create(self, vals):
         task = super(Task, self).create(vals)
         if not vals.get('full_name'):
             task._set_full_name()
         
-        if vals.get('qty') or vals.get('price'):
-            if task.is_leaf:
-                task._set_amount()
-        
         if task.parent_id and task.amount:
-            task.parent_id._set_amount()
+            task.parent_id._set_amount_childs()
         
         return task
-
-
-""" 
-
-    @api.multi
-    @api.depends('amount','amount_acc')
-    def _compute_rate(self):
-        for rec in self:
-            rec.rate = ( rec.amount and rec.amount_acc 
-                       ) and ( rec.amount_acc / rec.amount ) or 0.0
-
-
-    @api.multi
-    @api.depends('is_leaf','price','daywork_ids.qty_close')
-    def _compute_acc(self):
-        for rec in self:
-            if rec.is_leaf:
-                works = rec.daywork_ids.sorted(key='date', reverse=True)
-                if works:
-                    rec.qty_acc = works[0].qty_close
-                    rec.amount_acc = works[0].qty_close * rec.price
-                else:
-                    rec.qty_acc = 0
-                    rec.amount_acc = 0
-            else:
-                rec.amount_acc = sum( rec.child_ids.mapped('amount_acc') )
-
-
-"""    
-    
 
 class TaskDaywork(models.Model):
     _name = "project.task.daywork"
@@ -209,55 +175,60 @@ class TaskDaywork(models.Model):
 
     last_daywork_id = fields.Many2one('project.task.daywork', 'Last Daywork')
     qty = fields.Float('Quantity', default=0.0)
-    qty_open = fields.Float('Open Quantity', default=0.0  )
-    qty_close = fields.Float('Close Quantity', default=0.0 )
+    qty_open = fields.Float('Open Quantity', default=0.0 )
+    qty_close = fields.Float('Close Quantity', default=0.0, compute='_compute_qty_close' )
 
     @api.multi
+    @api.depends('qty','qty_open')
+    def _compute_qty_close(self):
+        for rec in self:
+            rec.qty_close = rec.qty_open + rec.qty
+
+    def _set_name(self):
+        self.name = ( self.task_id.name or '' ) + '.' + (
+                      self.data and fields.Date.to_string( self.data ) or '' )
+
+    def _set_full_name(self):
+        self.full_name = ( self.task_id.full_name or '' ) + '.' + (
+                      self.data and fields.Date.to_string( self.data ) or '' )
+
+    def _set_qty_open(self):
+        if self.last_daywork_id:
+            self.qty_open = self.last_daywork_id.qty_close
+        else:
+            self.qty_open = 0
+            
+    @api.multi
     def write(self, vals):
-        date = vals.get('date')
-        if date:
-            vals['name'] = self.task_id.name + '.' + date
-            vals['full_name'] = self.task_id.full_name + '.' + date
+        old_date = self.date
+        old_task = self.task_id
+        old_last_daywork_id = self.last_daywork_id.id
+        
+        ret = super(TaskDaywork, self).write(vals)
+        
+        if old_task != self.task_id or old_date != self.date:
+            if not vals.get('name'):
+                daywork._set_name()
+                
+            if not vals.get('full_name'):
+                daywork._set_full_name()
 
-        qty = vals.get('qty',None)
-        last_daywork_id = vals.get('last_daywork_id',None)
+        if old_last_daywork_id != self.last_daywork_id.id
+            if not vals.get('qty_open'):
+                self._set_qty_open()
 
-        if last_daywork_id:
-            qty_open = self.last_daywork_id.browse(last_daywork_id).qty_close
-            vals['qty_open'] = qty_open
-            
-            if qty != None:
-                qty1 = qty
-            else:
-                qty1 = self.qty
-            
-            vals['qty_close'] = qty_open + qty1
-        
-        elif qty != None:
-            vals['qty_close'] = self.qty_open + qty
-        
-        return super(TaskDaywork, self).write(vals)
-        
-    
+        return ret
+
     @api.model
     def create(self, vals):
-        date = vals.get('date','')
-        task_id = vals.get('task_id')
-        if task_id:
-            task = self.task_id.browse(task_id)
-            vals['name'] = task.name + '.' + date
-            vals['full_name'] = task.full_name + '.' + date
+        daywork = super(TaskDaywork, self).create(vals)
+        if not vals.get('name'):
+            daywork._set_name()
 
-        qty = vals.get('qty',0)
-        last_daywork_id = vals.get('last_daywork_id',None)
+        if not vals.get('full_name'):
+            daywork._set_full_name()
         
-        qty_open = 0
-        if last_daywork_id:
-            qty_open = self.last_daywork_id.browse(last_daywork_id).qty_close
-
-        vals['qty_open'] = qty_open
-        vals['qty_close'] = qty_open + qty
+        if not vals.get('qty_open'):
+            daywork._set_qty_open()
         
-
-        return super(TaskDaywork, self).create(vals)
-
+        return daywork
