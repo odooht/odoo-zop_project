@@ -73,9 +73,46 @@ class Task(models.Model):
     rate = fields.Float('Rate', default=0.0  )
     
     daywork_ids = fields.One2many('project.task.daywork','task_id',string='Task Dayworks')
+    
+    
+    def _set_full_name(self):
+        if self.parent_id:
+            self.full_name = self.parent_id.full_name + '.' + self.name
+        else:
+            self.full_name = self.name
+
+    def _set_amount(self):
+        if self.is_leaf:
+            self.amount = self.qty * self.price
+        else:
+            self.amount =  sum( self.child_ids.mapped('amount') )
 
     @api.multi
     def write(self, vals):
+        old_parent = self.parent_id
+        ret = super(Task, self).write(vals)
+        if not vals.get('full_name'):
+            if vals.get('parent_id') or vals.get('name')
+                self._set_full_name()
+        
+        todo = 0
+        
+        if vals.get('qty') != None  or vals.get('price') != None:
+            if self.is_leaf:
+                self._set_amount()
+                todo = 1
+        
+        if vals.get('parent_id')
+            old_parent._set_amount()
+            todo = 1
+            
+        if todo and self.parent_id:
+            self.parent_id._set_amount()
+        
+        return ret
+
+    """ 
+    def write2(self, vals):
         name = vals.get('name',None)
         full_name = vals.get('full_name', None)
         parent_id = vals.get('parent_id')
@@ -104,49 +141,22 @@ class Task(models.Model):
             pass
             
         return super(Task, self).write(vals)
-        
+    """
     
     @api.model
     def create(self, vals):
         task = super(Task, self).create(vals)
         if not vals.get('full_name'):
-            if task.parent_id:
-                task.full_name = ask.parent_id.full_name + '.' + task.name
-            else:
-                task.full_name = task.name
+            task._set_full_name()
         
         if vals.get('qty') or vals.get('price'):
-            task.amount = task.qty * task.price
+            if task.is_leaf:
+                task._set_amount()
         
         if task.parent_id and task.amount:
-            # re compute parent
-            pass
+            task.parent_id._set_amount()
         
         return task
-        
-
-    def create2(self, vals):
-        name = vals.get('name','')
-        full_name = vals.get('full_name', None)
-        parent_id = vals.get('parent_id')
-        
-        if not full_name:
-            fname = []
-            if parent_id:
-                fname.append( self.parent_id.browse(parent_id).full_name )
-            fname.append( name )
-            vals['full_name'] = '.'.join(fname)
-
-        qty = vals.get('qty',0)
-        price = vals.get('price', 0)
-        vals['amount'] = qty * price
-            
-        if parent_id:
-            # recompute parent amount
-            pass
-
-        return super(Task, self).create(vals)
-
 
 
 """ 
