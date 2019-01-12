@@ -92,7 +92,7 @@ class Task(models.Model):
         old_parent = self.parent_id
         ret = super(Task, self).write(vals)
         if not vals.get('full_name'):
-            if vals.get('parent_id') or vals.get('name')
+            if vals.get('parent_id') or vals.get('name'):
                 self._set_full_name()
         
         todo = 0
@@ -102,7 +102,7 @@ class Task(models.Model):
                 self._set_amount()
                 todo = 1
         
-        if vals.get('parent_id')
+        if vals.get('parent_id'):
             old_parent._set_amount()
             todo = 1
             
