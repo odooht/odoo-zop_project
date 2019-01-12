@@ -73,7 +73,7 @@ class Task(models.Model):
     
     last_daywork_id = fields.Many2one('project.task.daywork', string='Last Daywork')
     
-    qty_acc_me = fields.Float('Accumulate Quantity by Me', default=0.0, related='last_daywork_id.qty_close' )
+    qty_acc = fields.Float('Accumulate Quantity by Me', default=0.0, related='last_daywork_id.qty_close' )
     amount_acc_me = fields.Float('Accumulate Amount by Me', default=0.0,compute='_compute_amount_acc_me' )
     amount_acc_childs = fields.Float('Accumulate Amount by childs', default=0.0 )
     amount_acc = fields.Float('Accumulate Amount', default=0.0,compute='_compute_amount_acc' )
@@ -95,10 +95,10 @@ class Task(models.Model):
                 rec.amount = rec.amount_childs
     
     @api.multi
-    @api.depends('qty_acc_me','price')
+    @api.depends('qty_acc','price')
     def _compute_amount_acc_me(self):
         for rec in self:
-            rec.amount_acc_me = rec.qty_acc_me * rec.price
+            rec.amount_acc_me = rec.qty_acc * rec.price
     
     @api.multi
     @api.depends('amount_acc_me','is_leaf','amount_acc_childs')

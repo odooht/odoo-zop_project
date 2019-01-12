@@ -117,8 +117,13 @@
                         <field name="uom_id"/>
                         <field name="price"/>
                         <field name="qty"/>
-                        <field name="qty_acc"/>
+                        <field name="amount_me"/>
+                        <field name="amount_childs"/>
                         <field name="amount"/>
+                        <field name="last_daywork_id"/>
+                        <field name="qty_acc"/>
+                        <field name="amount_acc_me"/>
+                        <field name="amount_acc_childs"/>
                         <field name="amount_acc"/>
                         <field name="rate"/>
 
