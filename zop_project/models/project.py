@@ -80,15 +80,17 @@ class Task(models.Model):
         full_name = vals.get('full_name', None)
         parent_id = vals.get('parent_id')
         
-        if not full_name and ( name != None or not parent_id ):
+        old_parent = self.parent_id
+        if not full_name and ( parent_id or name ):
+            fname = []
             if parent_id:
-                vals['full_name'] = self.parent_id.browse(parent_id).full_name + '.' + name
-            elif self.parent_id:
-                vals['full_name'] = self.parent_id.full_name + '.' + name
-            else:
-                vals['full_name'] = name
-
+                fname.append( self.parent_id.browse(parent_id).full_name )
+            elif old_parent:
+                fname.append( old_parent.full_name )
         
+            fname.append( name and name or self.name )
+            vals['full_name'] = '.'.join(fname)
+            
         qty = vals.get('qty',None)
         price = vals.get('price', None)
         
@@ -110,11 +112,12 @@ class Task(models.Model):
         full_name = vals.get('full_name', None)
         parent_id = vals.get('parent_id')
         
-        if not full_name and name != None:
+        if not full_name:
+            fname = []
             if parent_id:
-                vals['full_name'] = self.parent_id.browse(parent_id).full_name + '.' + name
-            else:
-                vals['full_name'] = name
+                fname.append( self.parent_id.browse(parent_id).full_name )
+            fname.append( name )
+            vals['full_name'] = '.'.join(fname)
 
         qty = vals.get('qty',0)
         price = vals.get('price', 0)
@@ -124,20 +127,11 @@ class Task(models.Model):
             # recompute parent amount
             pass
 
-
         return super(Task, self).create(vals)
 
 
 
 """ 
-    @api.multi
-    @api.depends('project_id','parent_id.full_name')
-    def _compute_name(self):
-        for rec in self:
-            if rec.parent_id:
-                rec.full_name  = rec.parent_id.full_name + '.' + rec.name
-            else:
-                rec.full_name  = rec.name
 
     @api.multi
     @api.depends('amount','amount_acc')
@@ -162,15 +156,6 @@ class Task(models.Model):
             else:
                 rec.amount_acc = sum( rec.child_ids.mapped('amount_acc') )
 
-
-    @api.multi
-    @api.depends('is_leaf','qty','price','child_ids.amount')
-    def _compute_amount(self):
-        for rec in self:
-            if rec.is_leaf:
-                rec.amount = rec.qty * rec.price
-            else:
-                rec.amount = sum( rec.child_ids.mapped('amount') )
 
 """    
     

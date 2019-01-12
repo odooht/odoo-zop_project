@@ -7,6 +7,8 @@ records['project.project'] = [{'code':'BJ16.17','name': '北京地铁16号线17�
 
 records['project.task'] = [
   {'project_id': 'BJ16.17', 'code': '1',       'name':'某某车站', },
+]
+""" 
   {'project_id': 'BJ16.17', 'code': '1.1',     'name':'车站附属', },
   {'project_id': 'BJ16.17', 'code': '1.1.1',   'name':'1号风井',  },
   {'project_id': 'BJ16.17', 'code': '1.1.1.1', 'name':'竖井',  'is_leaf': True, 'uom_id': 'm', 'price': 10000,'qty':28.91 },
@@ -146,6 +148,6 @@ records['project.task'] = [
   {'project_id': 'BJ16.17', 'code': '2.3.2.2', 'name':'分段开挖2', 'is_leaf': True, 'uom_id': 'm', 'price': 5000,'qty':330.12 },
   {'project_id': 'BJ16.17', 'code': '2.3.2.3', 'name':'分段开挖3', 'is_leaf': True, 'uom_id': 'm', 'price': 5000,'qty':151.42 },
   {'project_id': 'BJ16.17', 'code': '2.3.2.4', 'name':'分段开挖4', 'is_leaf': True, 'uom_id': 'm', 'price': 5000,'qty':107.18 },
-  
 ]
+"""  
 
