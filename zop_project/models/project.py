@@ -213,7 +213,7 @@ class TaskDaywork(models.Model):
             if not vals.get('full_name'):
                 daywork._set_full_name()
 
-        if old_last_daywork_id != self.last_daywork_id.id
+        if old_last_daywork_id != self.last_daywork_id.id:
             if not vals.get('qty_open'):
                 self._set_qty_open()
 
