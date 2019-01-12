@@ -95,13 +95,13 @@ class Task(models.Model):
                 rec.amount = rec.amount_childs
     
     @api.multi
-    @api.depends('qty','price')
+    @api.depends('qty_acc_me','price')
     def _compute_amount_acc_me(self):
         for rec in self:
             rec.amount_acc_me = rec.qty_acc_me * rec.price
     
     @api.multi
-    @api.depends('amount_me','is_leaf','amount_childs')
+    @api.depends('amount_acc_me','is_leaf','amount_acc_childs')
     def _compute_amount_acc(self):
         for rec in self:
             if rec.is_leaf:
@@ -110,7 +110,7 @@ class Task(models.Model):
                 rec.amount_acc = rec.amount_acc_childs
     
     @api.multi
-    @api.depends('amount','qty_acc','price')
+    @api.depends('amount','amount_acc')
     def _compute_rate(self):
         for rec in self:
             rec.rate = ( rec.amount and rec.amount_acc 
