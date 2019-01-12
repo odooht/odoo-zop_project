@@ -108,6 +108,24 @@ class Task(models.Model):
     
     @api.model
     def create(self, vals):
+        task = super(Task, self).create(vals)
+        if not vals.get('full_name'):
+            if task.parent_id:
+                task.full_name = ask.parent_id.full_name + '.' + task.name
+            else:
+                task.full_name = task.name
+        
+        if vals.get('qty') or vals.get('price'):
+            task.amount = task.qty * task.price
+        
+        if task.parent_id and task.amount:
+            # re compute parent
+            pass
+        
+        return task
+        
+
+    def create2(self, vals):
         name = vals.get('name','')
         full_name = vals.get('full_name', None)
         parent_id = vals.get('parent_id')
