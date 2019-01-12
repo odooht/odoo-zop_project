@@ -127,10 +127,16 @@ class Task(models.Model):
         if self.parent_id:
             self.parent_id._set_amount_childs()
 
+    def _set_amount_acc_childs(self):
+        self.amount_acc_childs =  sum( self.child_ids.mapped('amount_acc') )
+        if self.parent_id:
+            self.parent_id._set_amount_acc_childs()
+
     @api.multi
     def write(self, vals):
         old_parent_id = self.parent_id.id
         old_amount = self.amount
+        old_amount_acc = self.amount_acc
         
         ret = super(Task, self).write(vals)
         
@@ -140,11 +146,17 @@ class Task(models.Model):
         
         if self.parent_id.id != old_parent_id:
             if old_parent_id:
-                self.browse(old_parent_id)._set_amount_childs()
+                old_parent = self.browse(old_parent_id)
+                old_parent._set_amount_childs()
+                old_parent._set_amount_acc_childs()
 
         if self.parent_id.id != old_parent_id or self.amount != old_amount:
             if self.parent_id:
                 self.parent_id._set_amount_childs()
+
+        if self.parent_id.id != old_parent_id or self.amount_acc != old_amount_acc:
+            if self.parent_id:
+                self.parent_id._set_amount_acc_childs()
 
         return ret
 
@@ -156,6 +168,9 @@ class Task(models.Model):
         
         if task.parent_id and task.amount:
             task.parent_id._set_amount_childs()
+        
+        if task.parent_id and task.amount_acc:
+            task.parent_id._set_amount_acc_childs()
         
         return task
 
