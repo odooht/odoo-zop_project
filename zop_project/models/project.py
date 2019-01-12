@@ -186,11 +186,11 @@ class TaskDaywork(models.Model):
 
     def _set_name(self):
         self.name = ( self.task_id.name or '' ) + '.' + (
-                      self.data and fields.Date.to_string( self.data ) or '' )
+                      self.date and fields.Date.to_string( self.date ) or '' )
 
     def _set_full_name(self):
         self.full_name = ( self.task_id.full_name or '' ) + '.' + (
-                      self.data and fields.Date.to_string( self.data ) or '' )
+                      self.date and fields.Date.to_string( self.date ) or '' )
 
     def _set_qty_open(self):
         if self.last_daywork_id:
