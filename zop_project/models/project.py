@@ -81,6 +81,7 @@ class Task(models.Model):
         else:
             self.full_name = self.name
 
+    
     def _set_amount(self):
         if self.is_leaf:
             self.amount = self.qty * self.price
@@ -89,7 +90,7 @@ class Task(models.Model):
 
     @api.multi
     def write(self, vals):
-        old_parent = self.parent_id
+        old_parent_id = self.parent_id.id
         ret = super(Task, self).write(vals)
         if not vals.get('full_name'):
             if vals.get('parent_id') or vals.get('name'):
@@ -103,8 +104,12 @@ class Task(models.Model):
                 todo = 1
         
         if vals.get('parent_id'):
-            old_parent._set_amount()
-            todo = 1
+            if old_parent_id:
+                if old_parent_id != vals.get('parent_id'):
+                    self.browse(old_parent_id)._set_amount()
+                    todo = 1
+            else:
+                todo = 1
             
         if todo and self.parent_id:
             self.parent_id._set_amount()
