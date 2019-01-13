@@ -297,6 +297,7 @@ class TaskWorkfact(models.Model):
     def write(self, vals):
         old_daykey = self.daykey
         old_task = self.task_id
+        old_last_workfact_id = self.last_workfact_id
         
         ret = super(TaskWorkfact, self).write(vals)
         
@@ -306,6 +307,11 @@ class TaskWorkfact(models.Model):
                 
             if not vals.get('full_name'):
                 self._set_full_name()
+
+        if old_last_workfact_id != self.last_workfact_id:
+            if not vals.get('last_workfact_id'):
+                self._set_qty_open()
+        
 
         return ret
 
