@@ -230,7 +230,7 @@ class DateDimention(models.Model):
 class TaskWorkfact(models.Model):
     _name = "project.task.workfact"
     _description = "Project Task Workfact"
-    #_rec_name = 'full_name'
+    _rec_name = 'full_name'
 
     name = fields.Char('Name' )
     full_name = fields.Char('Full Name' )
@@ -260,6 +260,32 @@ class TaskWorkfact(models.Model):
     uom_id = fields.Many2one(related='task_id.uom_id')
     price = fields.Float(related='task_id.price')
     is_leaf = fields.Boolean(related='task_id.is_leaf')
+
+    worksheet_ids = fields.Many2many('project.task.worksheet')
+    last_workfact_id = fields.Many2one('project.task.workfact', 'Open Workfact')
+
+    qty_delta = fields.Float('Delta Quantity', default=0.0, compute='_compute_qty_delta' )
+    qty_open = fields.Float('Open Quantity', default=0.0 , 
+        help='related last_workfact_id.qty_close, but no compute ' )
+        
+    qty_close = fields.Float('Close Quantity', default=0.0, compute='_compute_qty_close' )
+
+    qty = fields.Float('Planed Quantity', default=0.0, related='task_id.qty')
+    amount = fields.Float('Planed Amount', default=0.0, related='task_id.amount')
+
+    amount_open_me  = fields.Float('Open Amount by Me', default=0.0,compute='_compute_amount_open_me' )
+    amount_delta_me = fields.Float('Delta Amount by Me', default=0.0,compute='_compute_amount_delta_me' )
+    amount_close_me = fields.Float('Close Amount by Me', default=0.0,compute='_compute_amount_close_me' )
+
+    amount_open_childs  = fields.Float('Open Amount by childs', default=0.0 )
+    amount_delta_childs = fields.Float('Delta Amount by childs', default=0.0 )
+    amount_close_childs = fields.Float('Close Amount by childs', default=0.0 )
+
+    amount_open  = fields.Float('Open Amount by Me', default=0.0,compute='_compute_amount' )
+    amount_delta = fields.Float('Delta Amount by Me', default=0.0,compute='_compute_amount' )
+    amount_close = fields.Float('Close Amount by Me', default=0.0,compute='_compute_amount' )
+
+    rate = fields.Float('Rate', default=0.0, compute='_compute_rate'  )
 
     def _set_name(self):
         self.name = ( self.task_id.name or '' ) + '.' + str(self.daykey)
@@ -291,34 +317,12 @@ class TaskWorkfact(models.Model):
 
         if not vals.get('full_name'):
             workfact._set_full_name()
+
+        if not vals.get('last_workfact_id'):
+            workfact._set_qty_open()
         
         return workfact
     
-    worksheet_ids = fields.Many2many('project.task.worksheet')
-    last_workfact_id = fields.Many2one('project.task.workfact', 'Open Workfact')
-
-    qty_delta = fields.Float('Delta Quantity', default=0.0, compute='_compute_qty_delta' )
-    qty_open = fields.Float('Open Quantity', default=0.0 , 
-        help='related last_workfact_id.qty_close, but no compute ' )
-        
-    qty_close = fields.Float('Close Quantity', default=0.0, compute='_compute_qty_close' )
-
-    amount = fields.Float('Planed Amount', default=0.0, related='task_id.amount')
-
-    amount_open_me  = fields.Float('Open Amount by Me', default=0.0,compute='_compute_amount_open_me' )
-    amount_delta_me = fields.Float('Delta Amount by Me', default=0.0,compute='_compute_amount_delta_me' )
-    amount_close_me = fields.Float('Close Amount by Me', default=0.0,compute='_compute_amount_close_me' )
-
-    amount_open_childs  = fields.Float('Open Amount by childs', default=0.0 )
-    amount_delta_childs = fields.Float('Delta Amount by childs', default=0.0 )
-    amount_close_childs = fields.Float('Close Amount by childs', default=0.0 )
-
-    amount_open  = fields.Float('Open Amount by Me', default=0.0,compute='_compute_amount' )
-    amount_delta = fields.Float('Delta Amount by Me', default=0.0,compute='_compute_amount' )
-    amount_close = fields.Float('Close Amount by Me', default=0.0,compute='_compute_amount' )
-
-    rate = fields.Float('Rate', default=0.0, compute='_compute_rate'  )
-
     @api.multi
     @api.depends('worksheet_ids.qty')
     def _compute_qty_delta(self):

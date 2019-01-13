@@ -279,6 +279,7 @@
                     <field name="week"/>
                     <field name="day"/>
                     <field name="date_type"/>
+                    <field name="qty"/>
                     <field name="qty_open"/>
                     <field name="qty_delta"/>
                     <field name="qty_close"/>
