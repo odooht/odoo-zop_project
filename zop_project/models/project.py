@@ -57,7 +57,7 @@ class Task(models.Model):
     #child_ids = fields.One2many('project.task', 'parent_id', string="Sub-tasks", context={'active_test': False})
     #subtask_count = fields.Integer("Sub-task count", compute='_compute_subtask_count')
 
-    code = fields.Char("Code", index=True, required=True)
+    code = fields.Char("Code", index=True )
     full_name = fields.Char('Full Name')
     
     is_leaf = fields.Boolean()
