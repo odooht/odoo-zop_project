@@ -182,7 +182,72 @@ class Task(models.Model):
     
 """
 
+class TaskWorksheet(models.Model):
+    _name = "project.task.worksheet"
+    _description = "Project Task Worksheet"
+    _rec_name = 'full_name'
 
+    code = fields.Char(required=True,)
+    sequence = fields.Integer()
+    number = fields.Integer()
+    name = fields.Char('Name' )
+    full_name = fields.Char('Name' )
+    date = fields.Date('Date',required=True,index=True )
+    
+    task_id = fields.Many2one('project.task', 'Task')
+    project_id = fields.Many2one(related='task_id.project_id')
+    uom_id = fields.Many2one(related='task_id.uom_id')
+    price = fields.Float(related='task_id.price')
+    qty = fields.Float('Quantity', default=0.0)
+
+    def _set_code(self):
+        self.code = ( self.task_id.code or '' ) + '.' + (
+                      self.date and fields.Date.to_string( self.date ) or '' ) + (
+                      str( self.number or 0 ) )
+
+    def _set_name(self):
+        self.name = ( self.task_id.name or '' ) + '.' + (
+                      self.date and fields.Date.to_string( self.date ) or '' ) + (
+                      str( self.number or 0 ) )
+
+    def _set_full_name(self):
+        self.full_name = ( self.task_id.full_name or '' ) + '.' + (
+                      self.date and fields.Date.to_string( self.date ) or '' ) + (
+                      str( self.number or 0 ) )
+
+    @api.multi
+    def write(self, vals):
+        old_date = self.date
+        old_code = self.code
+        old_task = self.task_id
+        
+        ret = super(TaskWorksheet, self).write(vals)
+        
+        if old_task != self.task_id or old_date != self.date or old_code != self.code:
+            if not vals.get('code'):
+                worksheet._set_code()
+                
+            if not vals.get('name'):
+                daywork._set_name()
+                
+            if not vals.get('full_name'):
+                daywork._set_full_name()
+
+        return ret
+
+    @api.model
+    def create(self, vals):
+        worksheet = super(TaskWorksheet, self).create(vals)
+        if not vals.get('code'):
+            worksheet._set_code()
+
+        if not vals.get('name'):
+            worksheet._set_name()
+
+        if not vals.get('full_name'):
+            worksheet._set_full_name()
+        
+        return worksheet
 
 
 

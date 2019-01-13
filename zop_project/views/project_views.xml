@@ -177,41 +177,43 @@
             action="action_task_list" />
 
 
-        <!-- 
-        <record model="ir.actions.act_window" id="action_daywork_list">
-            <field name="name">Dayworks</field>
-            <field name="res_model">project.task.daywork</field>
+        <record model="ir.actions.act_window" id="action_worksheet_list">
+            <field name="name">Worksheets</field>
+            <field name="res_model">project.task.worksheet</field>
             <field name="view_type">form</field>
             <field name="view_mode">tree,form</field>
             <field name="help" type="html">
-                <p class="oe_view_nocontent_create">Create a daywork
+                <p class="oe_view_nocontent_create">Create a worksheet
                 </p>
             </field>
         </record>
 
-        <menuitem id="menu_project_schedule_daywork" 
-            name="Dayworks" 
+        <menuitem id="menu_project_schedule_worksheet" 
+            name="Worksheets" 
             parent="menu_project_schedule"
             sequence="80" 
-            action="action_daywork_list" />
+            action="action_worksheet_list" />
 
-
-        <record id="daywork_tree" model="ir.ui.view">
-            <field name="name">project.task.daywork.tree</field>
-            <field name="model">project.task.daywork</field>
+        <record id="worksheet_tree" model="ir.ui.view">
+            <field name="name">project.task.worksheet.tree</field>
+            <field name="model">project.task.worksheet</field>
             <field name="arch" type="xml">
-                <tree string="Dayworks">
+                <tree string="Worksheets">
                     <field name="project_id"/>
                     <field name="task_id"/>
                     <field name="full_name"/>
+                    <field name="code"/>
                     <field name="uom_id"/>
                     <field name="date"/>
-                    <field name="qty_open"/>
                     <field name="qty"/>
-                    <field name="qty_close"/>
                 </tree>
             </field>
         </record>
+
+
+        <!-- 
+                    <field name="qty_open"/>
+                    <field name="qty_close"/>
 
         -->
 
