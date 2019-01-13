@@ -60,7 +60,7 @@ class Work(models.Model):
         ('group','Group'),
         ('node','Node'),
         ('item','Item'),
-    ])
+    ], default='group')
     
     uom_id = fields.Many2one('uom.uom', 'Unit of Measure')
     qty = fields.Float('Planed Quantity', default=0.0)

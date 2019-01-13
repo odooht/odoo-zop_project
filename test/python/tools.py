@@ -413,7 +413,7 @@ def find(model, domain, record=None ):
     return id
 
 
-def task2_one(rec):
+def work2_one(rec):
     rec = rec.copy()
     rec['project_id'] = project_id
 
@@ -422,7 +422,7 @@ def task2_one(rec):
         uom_id = search_one('uom.uom', [('name','=',uom  )])
         rec['uom_id'] = uom_id
     
-    model = 'project.task'
+    model = 'project.work'
     domain = [('code','=',rec['code']),('project_id','=',project_id) ]
     id = find(model, domain, record=rec )
     print id
@@ -431,7 +431,7 @@ def task2_one(rec):
         pass
 
 
-def task2_one_parent(rec):
+def work2_one_parent(rec):
     rec = rec.copy()
     rec['project_id'] = project_id
     ss = rec['code'].split('.')
@@ -441,11 +441,11 @@ def task2_one_parent(rec):
     nrec = {}
     
     if pcode:
-        uom_id = search_one('project.task', [('code','=',pcode),('project_id','=',project_id) ])
+        uom_id = search_one('project.work', [('code','=',pcode),('project_id','=',project_id) ])
         nrec['parent_id'] = uom_id
     
     #print pcode, rec['code'],nrec
-    model = 'project.task'
+    model = 'project.work'
     domain = [('code','=',rec['code']),('project_id','=',project_id) ]
     id = find(model, domain, record=nrec )
     print id
@@ -454,16 +454,16 @@ def task2_one_parent(rec):
         pass
 
 
-def task2_multi():
-    for rec in records['project.task']:
-        task2_one(rec)
+def work2_multi():
+    for rec in records['project.work']:
+        work2_one(rec)
 
-def task2_multi_parent():
-    for rec in records['project.task']:
-        task2_one_parent(rec)
+def work2_multi_parent():
+    for rec in records['project.work']:
+        work2_one_parent(rec)
 
 
 project_id = project_one()
-task2_multi()
-task2_multi_parent()
+work2_multi()
+work2_multi_parent()
 
