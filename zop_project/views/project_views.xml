@@ -120,17 +120,22 @@
                         <field name="amount_me"/>
                         <field name="amount_childs"/>
                         <field name="amount"/>
+                        
+                        <!-- 
                         <field name="last_daywork_id"/>
                         <field name="qty_acc"/>
                         <field name="amount_acc_me"/>
                         <field name="amount_acc_childs"/>
                         <field name="amount_acc"/>
                         <field name="rate"/>
+                        -->
 
                     </group>
                     <group col="2">
                         <field name="child_ids"/>
+                        <!-- 
                         <field name="daywork_ids"/>
+                        -->
                     </group>
                 </form>
             </field>
@@ -162,6 +167,7 @@
             <field name="act_window_id" ref="action_task_list"/>
         </record>
 
+        <!-- 
 
         <menuitem id="menu_project_schedule_task" 
             name="Tasks" 
@@ -205,6 +211,7 @@
             </field>
         </record>
 
+        -->
 
 </odoo>
 
