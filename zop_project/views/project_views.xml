@@ -173,7 +173,7 @@
         <menuitem id="menu_project_schedule_task" 
             name="Tasks" 
             parent="menu_project_schedule"
-            sequence="10" 
+            sequence="20" 
             action="action_task_list" />
 
 
@@ -191,7 +191,7 @@
         <menuitem id="menu_project_schedule_worksheet" 
             name="Worksheets" 
             parent="menu_project_schedule"
-            sequence="80" 
+            sequence="30" 
             action="action_worksheet_list" />
 
         <record id="worksheet_tree" model="ir.ui.view">
@@ -224,7 +224,7 @@
         <menuitem id="menu_olap_dim_date" 
             name="Dimention Date" 
             parent="menu_project_schedule"
-            sequence="80" 
+            sequence="40" 
             action="action_olap_dim_date_list" />
 
         <record id="olap_dim_date_list_tree" model="ir.ui.view">
@@ -262,7 +262,7 @@
         <menuitem id="menu_project_schedule_workfact" 
             name="Workfacts" 
             parent="menu_project_schedule"
-            sequence="80" 
+            sequence="50" 
             action="action_workfact_list" />
 
         <record id="workfact_tree" model="ir.ui.view">
