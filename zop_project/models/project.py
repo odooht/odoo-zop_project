@@ -212,6 +212,8 @@ class TaskWorksheet(models.Model):
 class DateDimention(models.Model):
     _name = "olap.dim.date"
     _description = "OLAP Dimention Date"
+    _rec_name = 'daykey'
+    
     date = fields.Date('Date',required=True,index=True )
     daykey = fields.Integer(help='yyyymmdd')
     weekkey = fields.Integer(help='yyyyww')
@@ -230,7 +232,8 @@ class TaskWorkfact(models.Model):
     _description = "Project Task Workfact"
     #_rec_name = 'full_name'
 
-    date = fields.Date('Date',required=True,index=True )
+    name = fields.Char('Name' )
+    full_name = fields.Char('Full Name' )
     date_id = fields.Many2one('olap.dim.date', 'Dimention Date')
     date_type = fields.Selection([
         ('day','Day'),
@@ -240,6 +243,7 @@ class TaskWorkfact(models.Model):
         ('year','Year'),
     ])
     
+    date = fields.Date(related='date_id.date' )
     daykey = fields.Integer( related='date_id.daykey' )
     weekkey = fields.Integer(related='date_id.weekkey')
     monthkey = fields.Integer(related='date_id.monthkey')
@@ -256,6 +260,39 @@ class TaskWorkfact(models.Model):
     uom_id = fields.Many2one(related='task_id.uom_id')
     price = fields.Float(related='task_id.price')
     is_leaf = fields.Boolean(related='task_id.is_leaf')
+
+    def _set_name(self):
+        self.name = ( self.task_id.name or '' ) + '.' + str(self.daykey)
+
+    def _set_full_name(self):
+        self.full_name = ( self.task_id.full_name or '' ) + '.' + str(self.daykey)
+
+    @api.multi
+    def write(self, vals):
+        old_daykey = self.daykey
+        old_task = self.task_id
+        
+        ret = super(TaskWorkfact, self).write(vals)
+        
+        if old_task != self.task_id or old_daykey != self.daykey:
+            if not vals.get('name'):
+                self._set_name()
+                
+            if not vals.get('full_name'):
+                self._set_full_name()
+
+        return ret
+
+    @api.model
+    def create(self, vals):
+        workfact = super(TaskWorkfact, self).create(vals)
+        if not vals.get('name'):
+            workfact._set_name()
+
+        if not vals.get('full_name'):
+            workfact._set_full_name()
+        
+        return workfact
     
     worksheet_ids = fields.Many2many('project.task.worksheet')
     last_workfact_id = fields.Many2one('project.task.workfact', 'Open Workfact')
