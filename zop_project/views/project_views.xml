@@ -169,7 +169,6 @@
             <field name="act_window_id" ref="action_task_list"/>
         </record>
 
-        <!-- 
 
         <menuitem id="menu_project_schedule_task" 
             name="Tasks" 
@@ -178,6 +177,7 @@
             action="action_task_list" />
 
 
+        <!-- 
         <record model="ir.actions.act_window" id="action_daywork_list">
             <field name="name">Dayworks</field>
             <field name="res_model">project.task.daywork</field>
