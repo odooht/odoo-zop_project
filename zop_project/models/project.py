@@ -228,7 +228,7 @@ class DateDimention(models.Model):
 class TaskWorkfact(models.Model):
     _name = "project.task.workfact"
     _description = "Project Task Workfact"
-    _rec_name = 'full_name'
+    #_rec_name = 'full_name'
 
     date = fields.Date('Date',required=True,index=True )
     date_id = fields.Many2one('olap.dim.date', 'Dimention Date')
@@ -295,10 +295,10 @@ class TaskWorkfact(models.Model):
             self.qty_open = 0
 
     @api.multi
-    @api.depends('qty','qty_open')
+    @api.depends('qty_delta','qty_open')
     def _compute_qty_close(self):
         for rec in self:
-            rec.qty_close = rec.qty_open + rec.qty
+            rec.qty_close = rec.qty_open + rec.qty_delta
 
 
     @api.multi
