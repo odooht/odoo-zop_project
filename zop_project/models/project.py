@@ -187,7 +187,7 @@ class TaskWorksheet(models.Model):
     _description = "Project Task Worksheet"
     _rec_name = 'full_name'
 
-    code = fields.Char(required=True,)
+    code = fields.Char()
     sequence = fields.Integer()
     number = fields.Integer()
     name = fields.Char('Name' )
