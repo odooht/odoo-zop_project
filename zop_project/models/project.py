@@ -309,7 +309,7 @@ class TaskWorkfact(models.Model):
                 self._set_full_name()
 
         if old_last_workfact_id != self.last_workfact_id:
-            if not vals.get('last_workfact_id'):
+            if not vals.get('qty_open'):
                 self._set_qty_open()
         
 
@@ -324,7 +324,7 @@ class TaskWorkfact(models.Model):
         if not vals.get('full_name'):
             workfact._set_full_name()
 
-        if not vals.get('last_workfact_id'):
+        if not vals.get('qty_open'):
             workfact._set_qty_open()
         
         return workfact
