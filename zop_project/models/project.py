@@ -69,16 +69,6 @@ class Task(models.Model):
     amount_childs = fields.Float('Planed Amount by Childs', default=0.0)
     amount = fields.Float('Planed Amount', default=0.0, compute='_compute_amount')
 
-    daywork_ids = fields.One2many('project.task.daywork','task_id',string='Task Dayworks')
-    
-    last_daywork_id = fields.Many2one('project.task.daywork', string='Last Daywork')
-    
-    qty_acc = fields.Float('Accumulate Quantity by Me', default=0.0, related='last_daywork_id.qty_close' )
-    amount_acc_me = fields.Float('Accumulate Amount by Me', default=0.0,compute='_compute_amount_acc_me' )
-    amount_acc_childs = fields.Float('Accumulate Amount by childs', default=0.0 )
-    amount_acc = fields.Float('Accumulate Amount', default=0.0,compute='_compute_amount_acc' )
-    rate = fields.Float('Rate', default=0.0, compute='_compute_rate'  )
-
     @api.multi
     @api.depends('qty','price')
     def _compute_amount_me(self):
@@ -94,6 +84,80 @@ class Task(models.Model):
             else:
                 rec.amount = rec.amount_childs
     
+    def _set_full_name(self):
+        if self.parent_id:
+            self.full_name = self.parent_id.full_name + '.' + self.name
+        else:
+            self.full_name = self.name
+
+    @api.multi
+    def write(self, vals):
+        old_parent_id = self.parent_id.id
+        old_amount = self.amount
+        
+        #old_amount_acc = self.amount_acc
+        
+        ret = super(Task, self).write(vals)
+        
+        if not vals.get('full_name'):
+            if vals.get('parent_id') or vals.get('name'):
+                self._set_full_name()
+        
+        if self.parent_id.id != old_parent_id:
+            if old_parent_id:
+                old_parent = self.browse(old_parent_id)
+                old_parent._set_amount_childs()
+                #old_parent._set_amount_acc_childs()
+
+        if self.parent_id.id != old_parent_id or self.amount != old_amount:
+            if self.parent_id:
+                self.parent_id._set_amount_childs()
+
+        
+        #if self.parent_id.id != old_parent_id or self.amount_acc != old_amount_acc:
+        #    if self.parent_id:
+        #        self.parent_id._set_amount_acc_childs()
+
+        return ret
+
+    @api.model
+    def create(self, vals):
+        task = super(Task, self).create(vals)
+        if not vals.get('full_name'):
+            task._set_full_name()
+        
+        if task.parent_id and task.amount:
+            task.parent_id._set_amount_childs()
+        
+        #if task.parent_id and task.amount_acc:
+        #    task.parent_id._set_amount_acc_childs()
+        
+        return task
+
+""" 
+    def _set_amount_childs(self):
+        self.amount_childs =  sum( self.child_ids.mapped('amount') )
+        if self.parent_id:
+            self.parent_id._set_amount_childs()
+
+    def _set_amount_acc_childs(self):
+        self.amount_acc_childs =  sum( self.child_ids.mapped('amount_acc') )
+        if self.parent_id:
+            self.parent_id._set_amount_acc_childs()
+
+
+    daywork_ids = fields.One2many('project.task.daywork','task_id',string='Task Dayworks')
+    
+    last_daywork_id = fields.Many2one('project.task.daywork', string='Last Daywork')
+    
+    qty_acc = fields.Float('Accumulate Quantity by Me', default=0.0, related='last_daywork_id.qty_close' )
+    amount_acc_me = fields.Float('Accumulate Amount by Me', default=0.0,compute='_compute_amount_acc_me' )
+    amount_acc_childs = fields.Float('Accumulate Amount by childs', default=0.0 )
+    amount_acc = fields.Float('Accumulate Amount', default=0.0,compute='_compute_amount_acc' )
+    rate = fields.Float('Rate', default=0.0, compute='_compute_rate'  )
+
+
+
     @api.multi
     @api.depends('qty_acc','price')
     def _compute_amount_acc_me(self):
@@ -116,64 +180,13 @@ class Task(models.Model):
             rec.rate = ( rec.amount and rec.amount_acc 
                        ) and ( rec.amount_acc / rec.amount ) or 0.0
     
-    def _set_full_name(self):
-        if self.parent_id:
-            self.full_name = self.parent_id.full_name + '.' + self.name
-        else:
-            self.full_name = self.name
+"""
 
-    def _set_amount_childs(self):
-        self.amount_childs =  sum( self.child_ids.mapped('amount') )
-        if self.parent_id:
-            self.parent_id._set_amount_childs()
 
-    def _set_amount_acc_childs(self):
-        self.amount_acc_childs =  sum( self.child_ids.mapped('amount_acc') )
-        if self.parent_id:
-            self.parent_id._set_amount_acc_childs()
 
-    @api.multi
-    def write(self, vals):
-        old_parent_id = self.parent_id.id
-        old_amount = self.amount
-        old_amount_acc = self.amount_acc
-        
-        ret = super(Task, self).write(vals)
-        
-        if not vals.get('full_name'):
-            if vals.get('parent_id') or vals.get('name'):
-                self._set_full_name()
-        
-        if self.parent_id.id != old_parent_id:
-            if old_parent_id:
-                old_parent = self.browse(old_parent_id)
-                old_parent._set_amount_childs()
-                old_parent._set_amount_acc_childs()
 
-        if self.parent_id.id != old_parent_id or self.amount != old_amount:
-            if self.parent_id:
-                self.parent_id._set_amount_childs()
 
-        if self.parent_id.id != old_parent_id or self.amount_acc != old_amount_acc:
-            if self.parent_id:
-                self.parent_id._set_amount_acc_childs()
-
-        return ret
-
-    @api.model
-    def create(self, vals):
-        task = super(Task, self).create(vals)
-        if not vals.get('full_name'):
-            task._set_full_name()
-        
-        if task.parent_id and task.amount:
-            task.parent_id._set_amount_childs()
-        
-        if task.parent_id and task.amount_acc:
-            task.parent_id._set_amount_acc_childs()
-        
-        return task
-
+""" 
 class TaskDaywork(models.Model):
     _name = "project.task.daywork"
     _description = "Project Task Daywork"
@@ -247,3 +260,4 @@ class TaskDaywork(models.Model):
             daywork._set_qty_open()
         
         return daywork
+"""
