@@ -210,12 +210,86 @@
             </field>
         </record>
 
+        <record model="ir.actions.act_window" id="action_olap_dim_date_list">
+            <field name="name">olap.dim.date</field>
+            <field name="res_model">olap.dim.date</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="help" type="html">
+                <p class="oe_view_nocontent_create">Create a olap dimention date
+                </p>
+            </field>
+        </record>
 
-        <!-- 
+        <menuitem id="menu_olap_dim_date" 
+            name="Dimention Date" 
+            parent="menu_project_schedule"
+            sequence="80" 
+            action="action_olap_dim_date_list" />
+
+        <record id="olap_dim_date_list_tree" model="ir.ui.view">
+            <field name="name">olap.dim.date.tree</field>
+            <field name="model">olap.dim.date</field>
+            <field name="arch" type="xml">
+                <tree string="Dimention Dates">
+                    <field name="date"/>
+                    <field name="day"/>
+                    <field name="week"/>
+                    <field name="month"/>
+                    <field name="quarter"/>
+                    <field name="year"/>
+                    <field name="daykey"/>
+                    <field name="weekkey"/>
+                    <field name="monthkey"/>
+                    <field name="quarterkey"/>
+                </tree>
+            </field>
+        </record>
+
+
+
+        <record model="ir.actions.act_window" id="action_workfact_list">
+            <field name="name">Workfacts</field>
+            <field name="res_model">project.task.workfact</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="help" type="html">
+                <p class="oe_view_nocontent_create">Create a workfact
+                </p>
+            </field>
+        </record>
+
+        <menuitem id="menu_project_schedule_workfact" 
+            name="Workfacts" 
+            parent="menu_project_schedule"
+            sequence="80" 
+            action="action_workfact_list" />
+
+        <record id="workfact_tree" model="ir.ui.view">
+            <field name="name">project.task.workfact.tree</field>
+            <field name="model">project.task.workfact</field>
+            <field name="arch" type="xml">
+                <tree string="Workfacts">
+                    <field name="project_id"/>
+                    <field name="task_id"/>
+                    <field name="date"/>
+                    <field name="year"/>
+                    <field name="quarter"/>
+                    <field name="month"/>
+                    <field name="week"/>
+                    <field name="day"/>
+                    <field name="date_type"/>
                     <field name="qty_open"/>
+                    <field name="qty_delta"/>
                     <field name="qty_close"/>
-
-        -->
+                    <field name="amount"/>
+                    <field name="amount_open"/>
+                    <field name="amount_delta"/>
+                    <field name="amount_close"/>
+                    <field name="rate"/>
+                </tree>
+            </field>
+        </record>
 
 </odoo>
 

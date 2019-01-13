@@ -58,7 +58,7 @@ class Task(models.Model):
     #subtask_count = fields.Integer("Sub-task count", compute='_compute_subtask_count')
 
     code = fields.Char("Code", index=True, required=True)
-    full_name = fields.Char('Name')
+    full_name = fields.Char('Full Name')
     
     is_leaf = fields.Boolean()
     
@@ -139,48 +139,8 @@ class Task(models.Model):
         
         return task
 
-""" 
-    def _set_amount_acc_childs(self):
-        self.amount_acc_childs =  sum( self.child_ids.mapped('amount_acc') )
-        if self.parent_id:
-            self.parent_id._set_amount_acc_childs()
+    worksheet_ids = fields.One2many('project.task.worksheet','task_id',string='Task Worksheets')
 
-
-    daywork_ids = fields.One2many('project.task.daywork','task_id',string='Task Dayworks')
-    
-    last_daywork_id = fields.Many2one('project.task.daywork', string='Last Daywork')
-    
-    qty_acc = fields.Float('Accumulate Quantity by Me', default=0.0, related='last_daywork_id.qty_close' )
-    amount_acc_me = fields.Float('Accumulate Amount by Me', default=0.0,compute='_compute_amount_acc_me' )
-    amount_acc_childs = fields.Float('Accumulate Amount by childs', default=0.0 )
-    amount_acc = fields.Float('Accumulate Amount', default=0.0,compute='_compute_amount_acc' )
-    rate = fields.Float('Rate', default=0.0, compute='_compute_rate'  )
-
-
-
-    @api.multi
-    @api.depends('qty_acc','price')
-    def _compute_amount_acc_me(self):
-        for rec in self:
-            rec.amount_acc_me = rec.qty_acc * rec.price
-    
-    @api.multi
-    @api.depends('amount_acc_me','is_leaf','amount_acc_childs')
-    def _compute_amount_acc(self):
-        for rec in self:
-            if rec.is_leaf:
-                rec.amount_acc = rec.amount_acc_me
-            else:
-                rec.amount_acc = rec.amount_acc_childs
-    
-    @api.multi
-    @api.depends('amount','amount_acc')
-    def _compute_rate(self):
-        for rec in self:
-            rec.rate = ( rec.amount and rec.amount_acc 
-                       ) and ( rec.amount_acc / rec.amount ) or 0.0
-    
-"""
 
 class TaskWorksheet(models.Model):
     _name = "project.task.worksheet"
@@ -191,7 +151,7 @@ class TaskWorksheet(models.Model):
     sequence = fields.Integer()
     number = fields.Integer()
     name = fields.Char('Name' )
-    full_name = fields.Char('Name' )
+    full_name = fields.Char('Full Name' )
     date = fields.Date('Date',required=True,index=True )
     
     task_id = fields.Many2one('project.task', 'Task')
@@ -202,17 +162,17 @@ class TaskWorksheet(models.Model):
 
     def _set_code(self):
         self.code = ( self.task_id.code or '' ) + '.' + (
-                      self.date and fields.Date.to_string( self.date ) or '' ) + (
+                      self.date and fields.Date.to_string( self.date ) or '' ) + '.' + (
                       str( self.number or 0 ) )
 
     def _set_name(self):
         self.name = ( self.task_id.name or '' ) + '.' + (
-                      self.date and fields.Date.to_string( self.date ) or '' ) + (
+                      self.date and fields.Date.to_string( self.date ) or '' ) + '.' + (
                       str( self.number or 0 ) )
 
     def _set_full_name(self):
         self.full_name = ( self.task_id.full_name or '' ) + '.' + (
-                      self.date and fields.Date.to_string( self.date ) or '' ) + (
+                      self.date and fields.Date.to_string( self.date ) or '' ) + '.' + (
                       str( self.number or 0 ) )
 
     @api.multi
@@ -249,27 +209,90 @@ class TaskWorksheet(models.Model):
         
         return worksheet
 
+class DateDimention(models.Model):
+    _name = "olap.dim.date"
+    _description = "OLAP Dimention Date"
+    date = fields.Date('Date',required=True,index=True )
+    daykey = fields.Integer(help='yyyymmdd')
+    weekkey = fields.Integer(help='yyyyww')
+    monthkey = fields.Integer(help='yyyymm')
+    quarterkey = fields.Integer(help='yyyy0q')
+
+    year = fields.Integer(help='yyyy')
+    quarter = fields.Integer(help='q')
+    month = fields.Integer(help='m')
+    week = fields.Integer(help='w')
+    day = fields.Integer(help='d')
 
 
-""" 
-class TaskDaywork(models.Model):
-    _name = "project.task.daywork"
-    _description = "Project Task Daywork"
+class TaskWorkfact(models.Model):
+    _name = "project.task.workfact"
+    _description = "Project Task Workfact"
     _rec_name = 'full_name'
 
-    name = fields.Char('Name' )
-    full_name = fields.Char('Name' )
     date = fields.Date('Date',required=True,index=True )
+    date_id = fields.Many2one('olap.dim.date', 'Dimention Date')
+    date_type = fields.Selection([
+        ('day','Day'),
+        ('week','Week'),
+        ('month','Month'),
+        ('quarter','Quarter'),
+        ('year','Year'),
+    ])
     
+    daykey = fields.Integer( related='date_id.daykey' )
+    weekkey = fields.Integer(related='date_id.weekkey')
+    monthkey = fields.Integer(related='date_id.monthkey')
+    quarterkey = fields.Integer(related='date_id.quarterkey')
+    day = fields.Integer( related='date_id.day' )
+    week = fields.Integer(related='date_id.week')
+    month = fields.Integer(related='date_id.month')
+    quarter = fields.Integer(related='date_id.quarter')
+    year = fields.Integer(related='date_id.year')
+    
+
     project_id = fields.Many2one(related='task_id.project_id')
     task_id = fields.Many2one('project.task', 'Task')
     uom_id = fields.Many2one(related='task_id.uom_id')
     price = fields.Float(related='task_id.price')
+    is_leaf = fields.Boolean(related='task_id.is_leaf')
+    
+    worksheet_ids = fields.Many2many('project.task.worksheet')
+    last_workfact_id = fields.Many2one('project.task.workfact', 'Open Workfact')
 
-    last_daywork_id = fields.Many2one('project.task.daywork', 'Last Daywork')
-    qty = fields.Float('Quantity', default=0.0)
-    qty_open = fields.Float('Open Quantity', default=0.0 )
+    qty_delta = fields.Float('Delta Quantity', default=0.0, compute='_compute_qty_delta' )
+    qty_open = fields.Float('Open Quantity', default=0.0 , 
+        help='related last_workfact_id.qty_close, but no compute ' )
+        
     qty_close = fields.Float('Close Quantity', default=0.0, compute='_compute_qty_close' )
+
+    amount = fields.Float('Planed Amount', default=0.0, related='task_id.amount')
+
+    amount_open_me  = fields.Float('Open Amount by Me', default=0.0,compute='_compute_amount_open_me' )
+    amount_delta_me = fields.Float('Delta Amount by Me', default=0.0,compute='_compute_amount_delta_me' )
+    amount_close_me = fields.Float('Close Amount by Me', default=0.0,compute='_compute_amount_close_me' )
+
+    amount_open_childs  = fields.Float('Open Amount by childs', default=0.0 )
+    amount_delta_childs = fields.Float('Delta Amount by childs', default=0.0 )
+    amount_close_childs = fields.Float('Close Amount by childs', default=0.0 )
+
+    amount_open  = fields.Float('Open Amount by Me', default=0.0,compute='_compute_amount' )
+    amount_delta = fields.Float('Delta Amount by Me', default=0.0,compute='_compute_amount' )
+    amount_close = fields.Float('Close Amount by Me', default=0.0,compute='_compute_amount' )
+
+    rate = fields.Float('Rate', default=0.0, compute='_compute_rate'  )
+
+    @api.multi
+    @api.depends('worksheet_ids.qty')
+    def _compute_qty_delta(self):
+        for rec in self:
+            rec.qty_delta = sum(rec.worksheet_ids.mapped('qty') )
+
+    def _set_qty_open(self):
+        if self.last_workfact_id:
+            self.qty_open = self.last_workfact_id.qty_close
+        else:
+            self.qty_open = 0
 
     @api.multi
     @api.depends('qty','qty_open')
@@ -277,52 +300,55 @@ class TaskDaywork(models.Model):
         for rec in self:
             rec.qty_close = rec.qty_open + rec.qty
 
-    def _set_name(self):
-        self.name = ( self.task_id.name or '' ) + '.' + (
-                      self.date and fields.Date.to_string( self.date ) or '' )
 
-    def _set_full_name(self):
-        self.full_name = ( self.task_id.full_name or '' ) + '.' + (
-                      self.date and fields.Date.to_string( self.date ) or '' )
-
-    def _set_qty_open(self):
-        if self.last_daywork_id:
-            self.qty_open = self.last_daywork_id.qty_close
-        else:
-            self.qty_open = 0
-            
     @api.multi
-    def write(self, vals):
-        old_date = self.date
-        old_task = self.task_id
-        old_last_daywork_id = self.last_daywork_id.id
-        
-        ret = super(TaskDaywork, self).write(vals)
-        
-        if old_task != self.task_id or old_date != self.date:
-            if not vals.get('name'):
-                daywork._set_name()
-                
-            if not vals.get('full_name'):
-                daywork._set_full_name()
+    @api.depends('qty_open','price')
+    def _compute_amount_open_me(self):
+        for rec in self:
+            rec.amount_open_me = rec.qty_open * rec.price
+    
+    @api.multi
+    @api.depends('qty_delta','price')
+    def _compute_amount_delta_me(self):
+        for rec in self:
+            rec.amount_delta_me = rec.qty_delta * rec.price
+    
+    @api.multi
+    @api.depends('qty_close','price')
+    def _compute_amount_close_me(self):
+        for rec in self:
+            rec.amount_close_me = rec.qty_close * rec.price
 
-        if old_last_daywork_id != self.last_daywork_id.id:
-            if not vals.get('qty_open'):
-                self._set_qty_open()
-
-        return ret
-
-    @api.model
-    def create(self, vals):
-        daywork = super(TaskDaywork, self).create(vals)
-        if not vals.get('name'):
-            daywork._set_name()
-
-        if not vals.get('full_name'):
-            daywork._set_full_name()
+    def _set_amount_childs(self):
+        child_worksheet_ids = self.task_id.child_ids.mapped('worksheet_ids')
         
-        if not vals.get('qty_open'):
-            daywork._set_qty_open()
-        
-        return daywork
-"""
+        open  = sum( child_worksheet_ids.mapped('amount_open_childs') )
+        delta = sum( child_worksheet_ids.mapped('amount_delta_childs') )
+        self.amount_open_childs  = open
+        self.amount_delta_childs = delta
+        self.amount_close_childs = open + delta
+        if self.parent_id:
+            self.parent_id._set_amount_childs()
+
+    
+    @api.multi
+    @api.depends('amount_open_me','amount_delta_me','amount_close_me',
+                 'amount_open_childs','amount_delta_childs','amount_close_childs')
+    def _compute_amount(self):
+        for rec in self:
+            if rec.is_leaf:
+                rec.amount_open  = rec.amount_open_me
+                rec.amount_delta = rec.amount_delta_me
+                rec.amount_close = rec.amount_close_me
+            else:
+                rec.amount_open  = rec.amount_open_childs
+                rec.amount_delta = rec.amount_delta_childs
+                rec.amount_close = rec.amount_close_childs
+    
+   
+    @api.multi
+    @api.depends('amount','amount_close')
+    def _compute_rate(self):
+        for rec in self:
+            rec.rate = ( rec.amount and rec.amount_close 
+                       ) and ( rec.amount_close / rec.amount ) or 0.0
