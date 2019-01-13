@@ -90,6 +90,11 @@ class Task(models.Model):
         else:
             self.full_name = self.name
 
+    def _set_amount_childs(self):
+        self.amount_childs =  sum( self.child_ids.mapped('amount') )
+        if self.parent_id:
+            self.parent_id._set_amount_childs()
+
     @api.multi
     def write(self, vals):
         old_parent_id = self.parent_id.id
@@ -135,11 +140,6 @@ class Task(models.Model):
         return task
 
 """ 
-    def _set_amount_childs(self):
-        self.amount_childs =  sum( self.child_ids.mapped('amount') )
-        if self.parent_id:
-            self.parent_id._set_amount_childs()
-
     def _set_amount_acc_childs(self):
         self.amount_acc_childs =  sum( self.child_ids.mapped('amount_acc') )
         if self.parent_id:
