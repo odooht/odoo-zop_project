@@ -249,7 +249,7 @@ class Workfact(models.Model):
     work_id = fields.Many2one('project.work', 'Work')
     uom_id = fields.Many2one(related='work_id.uom_id')
     price = fields.Float(related='work_id.price')
-    is_leaf = fields.Boolean(related='work_id.is_leaf')
+    work_type = fields.Boolean(related='work_id.work_type')
 
     worksheet_ids = fields.Many2many('project.worksheet')
     last_workfact_id = fields.Many2one('project.workfact', 'Open Workfact')
@@ -374,13 +374,14 @@ class Workfact(models.Model):
     def _compute_amount(self):
         for rec in self:
             if rec.is_leaf:
-                rec.amount_open  = rec.amount_open_me
-                rec.amount_delta = rec.amount_delta_me
-                rec.amount_close = rec.amount_close_me
-            else:
+            if rec.work_type == 'group':
                 rec.amount_open  = rec.amount_open_childs
                 rec.amount_delta = rec.amount_delta_childs
                 rec.amount_close = rec.amount_close_childs
+            else:
+                rec.amount_open  = rec.amount_open_me
+                rec.amount_delta = rec.amount_delta_me
+                rec.amount_close = rec.amount_close_me
     
    
     @api.multi
