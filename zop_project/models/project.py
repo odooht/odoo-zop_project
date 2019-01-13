@@ -225,13 +225,13 @@ class TaskWorksheet(models.Model):
         
         if old_task != self.task_id or old_date != self.date or old_code != self.code:
             if not vals.get('code'):
-                worksheet._set_code()
+                self._set_code()
                 
             if not vals.get('name'):
-                daywork._set_name()
+                self._set_name()
                 
             if not vals.get('full_name'):
-                daywork._set_full_name()
+                self._set_full_name()
 
         return ret
 
