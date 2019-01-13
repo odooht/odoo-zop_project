@@ -90,10 +90,12 @@
                     <field name="uom_id"/>
                     <field name="price"/>
                     <field name="qty"/>
-                    <field name="qty_acc"/>
                     <field name="amount"/>
+                    <!--
+                    <field name="qty_acc"/>
                     <field name="amount_acc"/>
                     <field name="rate"/>
+                    -->
                 </tree>
             </field>
         </record>
