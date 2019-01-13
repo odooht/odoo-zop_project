@@ -38,29 +38,29 @@ class Project(models.Model):
     consultor_id = fields.Many2one('res.partner', string='Consultor Company',
                                      domain=[('is_company','=',True )] )
     
-class Task(models.Model):
-    _inherit = "project.task"
-    _rec_name = 'full_name'
+class Work(models.Model):
+    _name = "project.work"
     _order = 'code'
-    
-    # inherit from project.task
-    #name = fields.Char(string='Title', track_visibility='always', required=True, index=True)
-    #description = fields.Html(string='Description')
-    #tag_ids = fields.Many2many('project.tags', string='Tags', oldname='categ_ids')
-    
-    #date_start = fields.Datetime(string='Starting Date',)
-    #date_end = fields.Datetime(string='Ending Date', index=True, copy=False)
-    #date_deadline = fields.Date(string='Deadline', index=True, copy=False, track_visibility='onchange')
-    #project_id = fields.Many2one('project.project', string='Project',
-    #partner_id = fields.Many2one('res.partner', string='Customer',)
-    #parent_id = fields.Many2one('project.task', string='Parent Task', index=True)
-    #child_ids = fields.One2many('project.task', 'parent_id', string="Sub-tasks", context={'active_test': False})
-    #subtask_count = fields.Integer("Sub-task count", compute='_compute_subtask_count')
+    _parent_store = True
 
-    code = fields.Char("Code", index=True )
+    name = fields.Char('Name')
+    code = fields.Char("Code"  )
     full_name = fields.Char('Full Name')
     
-    is_leaf = fields.Boolean()
+    date_from = fields.Datetime(string='Starting Date')
+    date_thru = fields.Datetime(string='Ending Date' )
+    project_id = fields.Many2one('project.project', string='Project')
+    partner_id = fields.Many2one('res.partner', string='Customer',)
+    
+    parent_id = fields.Many2one('project.work', string='Parent Work')
+    child_ids = fields.One2many('project.work', 'parent_id', string="Sub-works")
+    parent_path = fields.Char(index=True)
+
+    work_type = fields.Selection([
+        ('group','Group'),
+        ('node','Node'),
+        ('item','Item'),
+    ])
     
     uom_id = fields.Many2one('uom.uom', 'Unit of Measure')
     qty = fields.Float('Planed Quantity', default=0.0)
@@ -76,13 +76,13 @@ class Task(models.Model):
             rec.amount_me = rec.qty * rec.price
     
     @api.multi
-    @api.depends('amount_me','is_leaf','amount_childs')
+    @api.depends('amount_me','work_type','amount_childs')
     def _compute_amount(self):
         for rec in self:
-            if rec.is_leaf:
-                rec.amount = rec.amount_me
-            else:
+            if rec.work_type == 'group':
                 rec.amount = rec.amount_childs
+            else:
+                rec.amount = rec.amount_me
     
     def _set_full_name(self):
         if self.parent_id:
@@ -91,7 +91,8 @@ class Task(models.Model):
             self.full_name = self.name
 
     def _set_amount_childs(self):
-        self.amount_childs =  sum( self.child_ids.mapped('amount') )
+        childs = self.search[('id','child_of', self.id)]
+        self.amount_childs =  sum( childs.mapped('amount') )
         if self.parent_id:
             self.parent_id._set_amount_childs()
 
@@ -100,9 +101,7 @@ class Task(models.Model):
         old_parent_id = self.parent_id.id
         old_amount = self.amount
         
-        #old_amount_acc = self.amount_acc
-        
-        ret = super(Task, self).write(vals)
+        ret = super(Work, self).write(vals)
         
         if not vals.get('full_name'):
             if vals.get('parent_id') or vals.get('name'):
@@ -112,39 +111,30 @@ class Task(models.Model):
             if old_parent_id:
                 old_parent = self.browse(old_parent_id)
                 old_parent._set_amount_childs()
-                #old_parent._set_amount_acc_childs()
 
         if self.parent_id.id != old_parent_id or self.amount != old_amount:
             if self.parent_id:
                 self.parent_id._set_amount_childs()
 
-        
-        #if self.parent_id.id != old_parent_id or self.amount_acc != old_amount_acc:
-        #    if self.parent_id:
-        #        self.parent_id._set_amount_acc_childs()
-
         return ret
 
     @api.model
     def create(self, vals):
-        task = super(Task, self).create(vals)
+        work = super(Work, self).create(vals)
         if not vals.get('full_name'):
-            task._set_full_name()
+            work._set_full_name()
         
-        if task.parent_id and task.amount:
-            task.parent_id._set_amount_childs()
+        if work.parent_id and work.amount:
+            work.parent_id._set_amount_childs()
         
-        #if task.parent_id and task.amount_acc:
-        #    task.parent_id._set_amount_acc_childs()
-        
-        return task
+        return work
 
-    worksheet_ids = fields.One2many('project.task.worksheet','task_id',string='Task Worksheets')
+    worksheet_ids = fields.One2many('project.worksheet','work_id',string='Worksheets')
 
 
-class TaskWorksheet(models.Model):
-    _name = "project.task.worksheet"
-    _description = "Project Task Worksheet"
+class Worksheet(models.Model):
+    _name = "project.worksheet"
+    _description = "Project Worksheet"
     _rec_name = 'full_name'
 
     code = fields.Char()
@@ -154,24 +144,24 @@ class TaskWorksheet(models.Model):
     full_name = fields.Char('Full Name' )
     date = fields.Date('Date',required=True,index=True )
     
-    task_id = fields.Many2one('project.task', 'Task')
-    project_id = fields.Many2one(related='task_id.project_id')
-    uom_id = fields.Many2one(related='task_id.uom_id')
-    price = fields.Float(related='task_id.price')
+    work_id = fields.Many2one('project.work', 'Work')
+    project_id = fields.Many2one(related='work_id.project_id')
+    uom_id = fields.Many2one(related='work_id.uom_id')
+    price = fields.Float(related='work_id.price')
     qty = fields.Float('Quantity', default=0.0)
 
     def _set_code(self):
-        self.code = ( self.task_id.code or '' ) + '.' + (
+        self.code = ( self.work_id.code or '' ) + '.' + (
                       self.date and fields.Date.to_string( self.date ) or '' ) + '.' + (
                       str( self.number or 0 ) )
 
     def _set_name(self):
-        self.name = ( self.task_id.name or '' ) + '.' + (
+        self.name = ( self.work_id.name or '' ) + '.' + (
                       self.date and fields.Date.to_string( self.date ) or '' ) + '.' + (
                       str( self.number or 0 ) )
 
     def _set_full_name(self):
-        self.full_name = ( self.task_id.full_name or '' ) + '.' + (
+        self.full_name = ( self.work_id.full_name or '' ) + '.' + (
                       self.date and fields.Date.to_string( self.date ) or '' ) + '.' + (
                       str( self.number or 0 ) )
 
@@ -179,11 +169,11 @@ class TaskWorksheet(models.Model):
     def write(self, vals):
         old_date = self.date
         old_code = self.code
-        old_task = self.task_id
+        old_work = self.work_id
         
-        ret = super(TaskWorksheet, self).write(vals)
+        ret = super(Worksheet, self).write(vals)
         
-        if old_task != self.task_id or old_date != self.date or old_code != self.code:
+        if old_work != self.work_id or old_date != self.date or old_code != self.code:
             if not vals.get('code'):
                 self._set_code()
                 
@@ -197,7 +187,7 @@ class TaskWorksheet(models.Model):
 
     @api.model
     def create(self, vals):
-        worksheet = super(TaskWorksheet, self).create(vals)
+        worksheet = super(Worksheet, self).create(vals)
         if not vals.get('code'):
             worksheet._set_code()
 
@@ -227,9 +217,9 @@ class DateDimention(models.Model):
     day = fields.Integer(help='d')
 
 
-class TaskWorkfact(models.Model):
-    _name = "project.task.workfact"
-    _description = "Project Task Workfact"
+class Workfact(models.Model):
+    _name = "project.workfact"
+    _description = "Project Workfact"
     _rec_name = 'full_name'
 
     name = fields.Char('Name' )
@@ -255,14 +245,14 @@ class TaskWorkfact(models.Model):
     year = fields.Integer(related='date_id.year')
     
 
-    project_id = fields.Many2one(related='task_id.project_id')
-    task_id = fields.Many2one('project.task', 'Task')
-    uom_id = fields.Many2one(related='task_id.uom_id')
-    price = fields.Float(related='task_id.price')
-    is_leaf = fields.Boolean(related='task_id.is_leaf')
+    project_id = fields.Many2one(related='work_id.project_id')
+    work_id = fields.Many2one('project.work', 'Work')
+    uom_id = fields.Many2one(related='work_id.uom_id')
+    price = fields.Float(related='work_id.price')
+    is_leaf = fields.Boolean(related='work_id.is_leaf')
 
-    worksheet_ids = fields.Many2many('project.task.worksheet')
-    last_workfact_id = fields.Many2one('project.task.workfact', 'Open Workfact')
+    worksheet_ids = fields.Many2many('project.worksheet')
+    last_workfact_id = fields.Many2one('project.workfact', 'Open Workfact')
 
     qty_delta = fields.Float('Delta Quantity', default=0.0, compute='_compute_qty_delta' )
     qty_open = fields.Float('Open Quantity', default=0.0 , 
@@ -270,8 +260,8 @@ class TaskWorkfact(models.Model):
         
     qty_close = fields.Float('Close Quantity', default=0.0, compute='_compute_qty_close' )
 
-    qty = fields.Float('Planed Quantity', default=0.0, related='task_id.qty')
-    amount = fields.Float('Planed Amount', default=0.0, related='task_id.amount')
+    qty = fields.Float('Planed Quantity', default=0.0, related='work_id.qty')
+    amount = fields.Float('Planed Amount', default=0.0, related='work_id.amount')
 
     amount_open_me  = fields.Float('Open Amount by Me', default=0.0,compute='_compute_amount_open_me' )
     amount_delta_me = fields.Float('Delta Amount by Me', default=0.0,compute='_compute_amount_delta_me' )
@@ -288,20 +278,20 @@ class TaskWorkfact(models.Model):
     rate = fields.Float('Rate', default=0.0, compute='_compute_rate'  )
 
     def _set_name(self):
-        self.name = ( self.task_id.name or '' ) + '.' + str(self.daykey)
+        self.name = ( self.work_id.name or '' ) + '.' + str(self.daykey)
 
     def _set_full_name(self):
-        self.full_name = ( self.task_id.full_name or '' ) + '.' + str(self.daykey)
+        self.full_name = ( self.work_id.full_name or '' ) + '.' + str(self.daykey)
 
     @api.multi
     def write(self, vals):
         old_daykey = self.daykey
-        old_task = self.task_id
+        old_work = self.work_id
         old_last_workfact_id = self.last_workfact_id
         
-        ret = super(TaskWorkfact, self).write(vals)
+        ret = super(Workfact, self).write(vals)
         
-        if old_task != self.task_id or old_daykey != self.daykey:
+        if old_work != self.work_id or old_daykey != self.daykey:
             if not vals.get('name'):
                 self._set_name()
                 
@@ -317,7 +307,7 @@ class TaskWorkfact(models.Model):
 
     @api.model
     def create(self, vals):
-        workfact = super(TaskWorkfact, self).create(vals)
+        workfact = super(Workfact, self).create(vals)
         if not vals.get('name'):
             workfact._set_name()
 
@@ -367,7 +357,7 @@ class TaskWorkfact(models.Model):
             rec.amount_close_me = rec.qty_close * rec.price
 
     def _set_amount_childs(self):
-        child_worksheet_ids = self.task_id.child_ids.mapped('worksheet_ids')
+        child_worksheet_ids = self.work_id.child_ids.mapped('worksheet_ids')
         
         open  = sum( child_worksheet_ids.mapped('amount_open_childs') )
         delta = sum( child_worksheet_ids.mapped('amount_delta_childs') )

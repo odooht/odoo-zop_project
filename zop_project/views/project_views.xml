@@ -27,7 +27,7 @@
             <field name="name">project.project.form</field>
             <field name="model">project.project</field>
             <field name="arch" type="xml">
-                <form string="Task">
+                <form string="Project">
                     <group col="4">
                         <field name="code"/>
                         <field name="name"/>
@@ -76,110 +76,48 @@
 
 
 
-        <record id="task_tree" model="ir.ui.view">
-            <field name="name">project.task.tree</field>
-            <field name="model">project.task</field>
+        <record id="work_tree" model="ir.ui.view">
+            <field name="name">project.work.tree</field>
+            <field name="model">project.work</field>
             <field name="arch" type="xml">
-                <tree string="Tasks">
+                <tree string="Works">
                     <field name="project_id"/>
                     <field name="code"/>
                     <field name="full_name"/>
-                    <field name="date_start"/>
-                    <field name="date_end"/>
-                    <field name="subtask_count"/>
+                    <field name="date_from"/>
+                    <field name="date_thru"/>
+                    <field name="work_type"/>
                     <field name="uom_id"/>
                     <field name="price"/>
                     <field name="qty"/>
                     <field name="amount"/>
-                    <!--
-                    <field name="qty_acc"/>
-                    <field name="amount_acc"/>
-                    <field name="rate"/>
-                    -->
                 </tree>
             </field>
         </record>
 
-
-        <record id="task_form" model="ir.ui.view">
-            <field name="name">project.task.form</field>
-            <field name="model">project.task</field>
-            <field name="arch" type="xml">
-                <form string="Task">
-                    <group col="4">
-                        <field name="name"/>
-                        <field name="code"/>
-                        <field name="full_name"/>
-                        <field name="date_start"/>
-                        <field name="date_end"/>
-                        <field name="project_id"/>
-                        <field name="parent_id"/>
-                        <field name="subtask_count"/>
-                        <field name="is_leaf"/>
-                        <field name="uom_id"/>
-                        <field name="price"/>
-                        <field name="qty"/>
-                        <field name="amount_me"/>
-                        <field name="amount_childs"/>
-                        <field name="amount"/>
-                        
-                        <!-- 
-                        <field name="last_daywork_id"/>
-                        <field name="qty_acc"/>
-                        <field name="amount_acc_me"/>
-                        <field name="amount_acc_childs"/>
-                        <field name="amount_acc"/>
-                        <field name="rate"/>
-                        -->
-
-                    </group>
-                    <group col="2">
-                        <field name="child_ids"/>
-                        <!-- 
-                        <field name="daywork_ids"/>
-                        -->
-                    </group>
-                </form>
-            </field>
-        </record>
-
-        <record model="ir.actions.act_window" id="action_task_list">
-            <field name="name">Tasks</field>
-            <field name="res_model">project.task</field>
+        <record model="ir.actions.act_window" id="action_work_list">
+            <field name="name">Workks</field>
+            <field name="res_model">project.work</field>
             <field name="view_type">form</field>
             <field name="view_mode">tree,form</field>
-            <field name="view_id" ref="task_tree"/>
             <field name="help" type="html">
-                <p class="oe_view_nocontent_create">Create a Task
+                <p class="oe_view_nocontent_create">Create a Work
                 </p>
             </field>
         </record>
 
-        <record id="action_task_list_tree" model="ir.actions.act_window.view">
-            <field eval="1" name="sequence"/>
-            <field name="view_mode">tree</field>
-            <field name="view_id" ref="task_tree"/>
-            <field name="act_window_id" ref="action_task_list"/>
-        </record>
-
-        <record id="action_task_list_form" model="ir.actions.act_window.view">
-            <field eval="2" name="sequence"/>
-            <field name="view_mode">form</field>
-            <field name="view_id" ref="task_form"/>
-            <field name="act_window_id" ref="action_task_list"/>
-        </record>
 
 
-        <menuitem id="menu_project_schedule_task" 
-            name="Tasks" 
+        <menuitem id="menu_project_schedule_work" 
+            name="Works" 
             parent="menu_project_schedule"
             sequence="20" 
-            action="action_task_list" />
+            action="action_work_list" />
 
 
         <record model="ir.actions.act_window" id="action_worksheet_list">
             <field name="name">Worksheets</field>
-            <field name="res_model">project.task.worksheet</field>
+            <field name="res_model">project.worksheet</field>
             <field name="view_type">form</field>
             <field name="view_mode">tree,form</field>
             <field name="help" type="html">
@@ -195,12 +133,12 @@
             action="action_worksheet_list" />
 
         <record id="worksheet_tree" model="ir.ui.view">
-            <field name="name">project.task.worksheet.tree</field>
-            <field name="model">project.task.worksheet</field>
+            <field name="name">project.worksheet.tree</field>
+            <field name="model">project.worksheet</field>
             <field name="arch" type="xml">
                 <tree string="Worksheets">
                     <field name="project_id"/>
-                    <field name="task_id"/>
+                    <field name="work_id"/>
                     <field name="full_name"/>
                     <field name="code"/>
                     <field name="uom_id"/>
@@ -250,7 +188,7 @@
 
         <record model="ir.actions.act_window" id="action_workfact_list">
             <field name="name">Workfacts</field>
-            <field name="res_model">project.task.workfact</field>
+            <field name="res_model">project.workfact</field>
             <field name="view_type">form</field>
             <field name="view_mode">tree,form</field>
             <field name="help" type="html">
@@ -266,12 +204,12 @@
             action="action_workfact_list" />
 
         <record id="workfact_tree" model="ir.ui.view">
-            <field name="name">project.task.workfact.tree</field>
-            <field name="model">project.task.workfact</field>
+            <field name="name">project.workfact.tree</field>
+            <field name="model">project.workfact</field>
             <field name="arch" type="xml">
                 <tree string="Workfacts">
                     <field name="project_id"/>
-                    <field name="task_id"/>
+                    <field name="work_id"/>
                     <field name="date"/>
                     <field name="year"/>
                     <field name="quarter"/>
