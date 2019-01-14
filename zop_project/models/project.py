@@ -91,7 +91,7 @@ class Work(models.Model):
             self.full_name = self.name
 
     def _set_amount_childs(self):
-        parents = self.search[('id','parent_of', self.id)]
+        parents = self.search([('id','parent_of', [self.id])])
         parents |= self
         for parent in parents:
             childs = self.search[('id','child_of', parent.id), ('work_type','=','node')]
