@@ -104,6 +104,7 @@ class Work(models.Model):
         for rec in self:
             rec.amount = rec.qty * rec.price
 
+    """ 
     @api.multi
     def write(self,vals):
         old_parent_id = self.parent_id.id
@@ -111,7 +112,6 @@ class Work(models.Model):
         if vals.get('name') or vals.get('parent_id'):
             self._set_full_name()
             
-        """ 
 
         if vals.get('parent_id') or vals.get('price') or vals.get('qty'):
             old_parents = self.search([('id','parent_of', old_parent_id)])
@@ -121,7 +121,6 @@ class Work(models.Model):
             for parent in parents:
                 parent._set_price()
 
-        """
         
         return ret
 
@@ -136,6 +135,7 @@ class Work(models.Model):
             
         return work
 
+    """
 
     """ 
     price_me = fields.Float('Price Me', default=0.0 )
