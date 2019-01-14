@@ -106,10 +106,8 @@ class Work(models.Model):
     @api.multi
     def write(self,vals):
         ret = super(Work, self).write(vals)
-        if vals.get('name'):
+        if vals.get('name') or vals.get('parent_id'):
             self._set_full_name()
-        
-        
         
         return ret
 
