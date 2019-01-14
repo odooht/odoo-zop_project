@@ -94,7 +94,7 @@ class Work(models.Model):
         parents = self.search([('id','parent_of', [self.id])])
         parents |= self
         for parent in parents:
-            childs = self.search[('id','child_of', parent.id), ('work_type','=','node')]
+            childs = self.search([('id','child_of', parent.id), ('work_type','=','node')])
             parent.amount_childs =  sum( childs.mapped('amount') )
 
 
