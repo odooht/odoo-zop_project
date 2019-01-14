@@ -110,6 +110,8 @@ class Work(models.Model):
         ret = super(Work, self).write(vals)
         if vals.get('name') or vals.get('parent_id'):
             self._set_full_name()
+            
+        """ 
 
         if vals.get('parent_id') or vals.get('price') or vals.get('qty'):
             old_parents = self.search([('id','parent_of', old_parent_id)])
@@ -119,6 +121,7 @@ class Work(models.Model):
             for parent in parents:
                 parent._set_price()
 
+        """
         
         return ret
 
