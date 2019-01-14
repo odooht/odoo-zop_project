@@ -56,6 +56,7 @@ class Work(models.Model):
                 rec.full_name = rec.parent_id.full_name + '.' + rec.name
             else:
                 rec.full_name = rec.name
+                
 
     date_from = fields.Datetime(string='Starting Date')
     date_thru = fields.Datetime(string='Ending Date' )
@@ -101,6 +102,23 @@ class Work(models.Model):
     def _compute_amount(self):
         for rec in self:
             rec.amount = rec.qty * rec.price
+
+    @qpi.multi
+    def write(self,vals):
+        ret = super(Work, self).write(vals)
+        if vals.get('name'):
+            self._set_full_name()
+        
+        
+        
+        return ret
+
+    @qpi.multi
+    def create(self,vals):
+        work = super(Work, self).create(vals)
+        work._set_full_name()
+        return work
+
 
     """ 
     price_me = fields.Float('Price Me', default=0.0 )
