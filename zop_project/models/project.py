@@ -41,6 +41,7 @@ class Project(models.Model):
 class Work(models.Model):
     _name = "project.work"
     _order = 'code'
+    _rec_name = 'full_name'
     _parent_store = True
 
     name = fields.Char('Name')
@@ -126,7 +127,7 @@ class Work(models.Model):
         parents = self.search([('id','parent_of', [self.id])])
         parents |= self
         for parent in parents:
-            childs = self.search([('id','child_of', parent.id), ('subwork_count','=',0)])
+            childs = self.search([('id','child_of', parent.id), ('child_id','=',False)])
             parent.amount_childs =  sum( childs.mapped('amount') )
 
 
