@@ -54,7 +54,17 @@ class Work(models.Model):
     
     parent_id = fields.Many2one('project.work', string='Parent Work')
     child_ids = fields.One2many('project.work', 'parent_id', string="Sub-works")
+    subwork_count = fields.Integer("Sub-work count", compute='_compute_subwork_count')
     parent_path = fields.Char(index=True)
+
+    @api.depends('child_ids')
+    def _compute_subwork_count(self):
+        """ Note: since we accept only one level subwork, we can use a read_group here """
+        work_data = self.env['project.work'].read_group([('parent_id', 'in', self.ids)], ['parent_id'], ['parent_id'])
+        mapping = dict((data['parent_id'][0], data['parent_id_count']) for data in work_data)
+        for work in self:
+            work.subwork_count = mapping.get(work.id, 0)
+
 
     work_type = fields.Selection([
         ('group','Group'),
@@ -64,8 +74,8 @@ class Work(models.Model):
     
     uom_id = fields.Many2one('uom.uom', 'Unit of Measure')
     qty = fields.Float('Planed Quantity', default=0.0)
-    price_me = fields.Float('Price', default=0.0 )
-    price_childs = fields.Float('Price', default=0.0,compute='_compute_price_childs' )
+    price_me = fields.Float('Price Me', default=0.0 )
+    price_childs = fields.Float('Price Childs', default=0.0,compute='_compute_price_childs' )
     price = fields.Float('Price', default=0.0,compute='_compute_price' )
     
     amount_me = fields.Float('Planed Amount by Me', default=0.0, compute='_compute_amount_me')
@@ -116,7 +126,7 @@ class Work(models.Model):
         parents = self.search([('id','parent_of', [self.id])])
         parents |= self
         for parent in parents:
-            childs = self.search([('id','child_of', parent.id), ('work_type','=','node')])
+            childs = self.search([('id','child_of', parent.id), ('subwork_count','=',0)])
             parent.amount_childs =  sum( childs.mapped('amount') )
 
 
