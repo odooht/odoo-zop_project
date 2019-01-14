@@ -127,7 +127,7 @@ class Work(models.Model):
         parents = self.search([('id','parent_of', [self.id])])
         parents |= self
         for parent in parents:
-            childs = self.search([('id','child_of', parent.id), ('child_id','=',False)])
+            childs = self.search([('id','child_of', parent.id), ('child_ids','=',False)])
             parent.amount_childs =  sum( childs.mapped('amount') )
 
 
@@ -184,17 +184,30 @@ class Worksheet(models.Model):
     uom_id = fields.Many2one(related='work_id.uom_id')
     price = fields.Float(related='work_id.price')
     qty = fields.Float('Quantity', default=0.0)
+    
+    state = fields.Selection([
+        ('draft', 'Draft'),
+        ('post', 'Post'),
+        ('done', 'Done'),
+        ('cancel', 'Cancelled'),
+        ], string='Status', default='draft')
 
+    @api.one
+    @api.onchang('date','number','work_id.code')
     def _set_code(self):
         self.code = ( self.work_id.code or '' ) + '.' + (
                       self.date and fields.Date.to_string( self.date ) or '' ) + '.' + (
                       str( self.number or 0 ) )
 
+    @api.one
+    @api.onchang('date','number','work_id.name')
     def _set_name(self):
         self.name = ( self.work_id.name or '' ) + '.' + (
                       self.date and fields.Date.to_string( self.date ) or '' ) + '.' + (
                       str( self.number or 0 ) )
 
+    @api.one
+    @api.onchang('date','number','work_id.name')
     def _set_full_name(self):
         self.full_name = ( self.work_id.full_name or '' ) + '.' + (
                       self.date and fields.Date.to_string( self.date ) or '' ) + '.' + (
@@ -208,6 +221,7 @@ class Worksheet(models.Model):
         
         ret = super(Worksheet, self).write(vals)
         
+        """ 
         if old_work != self.work_id or old_date != self.date or old_code != self.code:
             if not vals.get('code'):
                 self._set_code()
@@ -217,12 +231,14 @@ class Worksheet(models.Model):
                 
             if not vals.get('full_name'):
                 self._set_full_name()
-
+        """
         return ret
 
     @api.model
     def create(self, vals):
         worksheet = super(Worksheet, self).create(vals)
+        
+        """ 
         if not vals.get('code'):
             worksheet._set_code()
 
@@ -231,6 +247,7 @@ class Worksheet(models.Model):
 
         if not vals.get('full_name'):
             worksheet._set_full_name()
+        """
         
         return worksheet
 
@@ -289,7 +306,7 @@ class Workfact(models.Model):
     worksheet_ids = fields.Many2many('project.worksheet')
     last_workfact_id = fields.Many2one('project.workfact', 'Open Workfact')
 
-    qty_delta = fields.Float('Delta Quantity', default=0.0, compute='_compute_qty_delta' )
+    qty_delta = fields.Float('Delta Quantity', default=0.0  )
     qty_open = fields.Float('Open Quantity', default=0.0 , 
         help='related last_workfact_id.qty_close, but no compute ' )
         
@@ -317,6 +334,17 @@ class Workfact(models.Model):
 
     def _set_full_name(self):
         self.full_name = ( self.work_id.full_name or '' ) + '.' + str(self.daykey)
+
+    # compute from worksheet_ids.qty
+    def _set_qty_delta(self):
+        for rec in self:
+            rec.qty_delta = sum(rec.worksheet_ids.mapped('qty') )
+
+    def _set_qty_open(self):
+        if self.last_workfact_id:
+            self.qty_open = self.last_workfact_id.qty_close
+        else:
+            self.qty_open = 0
 
     @api.multi
     def write(self, vals):
@@ -354,17 +382,6 @@ class Workfact(models.Model):
         
         return workfact
     
-    @api.multi
-    @api.depends('worksheet_ids.qty')
-    def _compute_qty_delta(self):
-        for rec in self:
-            rec.qty_delta = sum(rec.worksheet_ids.mapped('qty') )
-
-    def _set_qty_open(self):
-        if self.last_workfact_id:
-            self.qty_open = self.last_workfact_id.qty_close
-        else:
-            self.qty_open = 0
 
     @api.multi
     @api.depends('qty_delta','qty_open')
@@ -390,6 +407,7 @@ class Workfact(models.Model):
     def _compute_amount_close_me(self):
         for rec in self:
             rec.amount_close_me = rec.qty_close * rec.price
+
 
     """ 
     def _set_amount_childs(self):

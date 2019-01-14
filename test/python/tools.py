@@ -391,9 +391,6 @@ def test_all():
 
 """
 
-usid, uid = get_user()
-print usid, uid
-
 def search_one(model, domain):
     ids = execute(usid, model, 'search', domain, limit=1)
     return ids and ids[0] or None
@@ -462,8 +459,23 @@ def work2_multi_parent():
     for rec in records['project.work']:
         work2_one_parent(rec)
 
+def date_one(rec):
+    model = 'olap.dim.date'
+    domain = [('date','=',rec['date']) ]
+    id = find(model, domain, record=rec )
+    print id
+    if id:
+        #print execute(usid, model, 'read', id)
+        pass
 
-project_id = project_one()
-work2_multi()
-work2_multi_parent()
+def date_multi():
+    for rec in records['olap.dim.date']:
+        date_one(rec)
 
+usid, uid = get_user()
+print usid, uid
+
+#project_id = project_one()
+#work2_multi()
+#work2_multi_parent()
+date_multi()

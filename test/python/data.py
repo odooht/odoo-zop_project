@@ -12,9 +12,6 @@ records['project.work'] = [
   {'project_id': 'BJ16.17', 'code': '1.1.1.1', 'name':'挖土方',   'work_type': 'item', 'uom_id': 'Liter(s)', 'price_me': 2,  'qty':100000 },
   {'project_id': 'BJ16.17', 'code': '1.1.1.2', 'name':'立拱架',   'work_type': 'item', 'uom_id': 'Unit(s)',  'price_me': 100,'qty':100 },
   {'project_id': 'BJ16.17', 'code': '1.1.1.3', 'name':'喷砼',     'work_type': 'item', 'uom_id': 'kg',       'price_me': 9,  'qty':10000 },
-]
-
-"""
   {'project_id': 'BJ16.17', 'code': '1.1.2',   'name':'1号横通道', },
   {'project_id': 'BJ16.17', 'code': '1.1.2.1', 'name':'第1层', 'work_type': 'node', 'uom_id': 'm', 'price_me': 8000,'qty':59.26 },
   {'project_id': 'BJ16.17', 'code': '1.1.2.2', 'name':'第2层', 'work_type': 'node', 'uom_id': 'm', 'price_me': 8000,'qty':59.26 },
@@ -152,4 +149,29 @@ records['project.work'] = [
   {'project_id': 'BJ16.17', 'code': '2.3.2.4', 'name':'分段开挖4', 'work_type': 'node', 'uom_id': 'm', 'price_me': 5000,'qty':107.18 },
 ]
 
-"""
+records['olap.dim.date'] = []
+
+
+def date_dim():
+    import datetime
+    def one_day(td):
+        return td.strftime('%Y-%m-%d'), td.year, (td.month-1) // 3 + 1 , td.month, td.day, int(td.strftime('%W'))
+    
+    td1= datetime.date(2019,1,1)
+    for i in range(0,365):
+        date, year, quarter, month, day, week = one_day( td1 + datetime.timedelta(days=i) )
+        
+        records['olap.dim.date'].append({
+            'date': date,
+            'year': year,
+            'quarter': quarter,
+            'month': month,
+            'day': day,
+            'week': week,
+            'quarterkey': year*100 + quarter,
+            'monthkey': year*100 + month,
+            'daykey':  year*10000 + month*100 + day,
+            'weekkey': year*100 + week,
+        })
+    
+date_dim()
