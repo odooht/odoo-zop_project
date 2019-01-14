@@ -122,9 +122,10 @@ class Work(models.Model):
             
 
         if vals.get('parent_id') or vals.get('price') or vals.get('qty'):
-            old_parents = self.search([('id','parent_of', old_parent_id)])
             parents = self.search([('id','parent_of', self.id)])
-            parents |= old_parents
+            if old_parent_id:
+                old_parents = self.search([('id','parent_of', old_parent_id)])
+                parents |= old_parents
             
             for parent in parents:
                 parent._set_price()
