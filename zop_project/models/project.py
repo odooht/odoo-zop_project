@@ -91,10 +91,12 @@ class Work(models.Model):
             self.full_name = self.name
 
     def _set_amount_childs(self):
-        childs = self.search[('id','child_of', self.id)]
-        self.amount_childs =  sum( childs.mapped('amount') )
-        if self.parent_id:
-            self.parent_id._set_amount_childs()
+        parents = self.search[('id','parent_of', self.id)]
+        parents |= self
+        for parent in parents:
+            childs = self.search[('id','child_of', parent.id), ('work_type','=','node')]
+            parent.amount_childs =  sum( childs.mapped('amount') )
+
 
     @api.multi
     def write(self, vals):
@@ -356,6 +358,7 @@ class Workfact(models.Model):
         for rec in self:
             rec.amount_close_me = rec.qty_close * rec.price
 
+    """ 
     def _set_amount_childs(self):
         child_worksheet_ids = self.work_id.child_ids.mapped('worksheet_ids')
         
@@ -366,7 +369,7 @@ class Workfact(models.Model):
         self.amount_close_childs = open + delta
         if self.parent_id:
             self.parent_id._set_amount_childs()
-
+    """
     
     @api.multi
     @api.depends('amount_open_me','amount_delta_me','amount_close_me',
