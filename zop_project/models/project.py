@@ -84,7 +84,16 @@ class Work(models.Model):
     ], default='group')
     
     uom_id = fields.Many2one('uom.uom', 'Unit of Measure')
-    qty = fields.Float('Planed Quantity', default=0.0)
+    
+    
+    @api.model
+    def _default_qty(self):
+        if rec.work_type == 'group':
+            return 1
+            
+        return 0.0
+    
+    qty = fields.Float('Planed Quantity', default=_default_qty)
     
     price = fields.Float('Price', default=0.0 )
     amount = fields.Float('Planed Amount', default=0.0, compute='_compute_amount' )
@@ -104,7 +113,6 @@ class Work(models.Model):
         for rec in self:
             rec.amount = rec.qty * rec.price
 
-    """ 
     @api.multi
     def write(self,vals):
         old_parent_id = self.parent_id.id
@@ -134,8 +142,6 @@ class Work(models.Model):
             parent._set_price()
             
         return work
-
-    """
 
     """ 
     price_me = fields.Float('Price Me', default=0.0 )
