@@ -95,12 +95,12 @@ def date_multi():
 usid, uid = get_user()
 print usid, uid
 
-#project_id = project_one()
-#work2_multi()
-#work2_multi_parent()
-#date_multi()
+project_id = project_one()
+work2_multi()
+work2_multi_parent()
+date_multi()
 
-
+""" 
 wsids = execute(usid, 'project.worksheet', 'search', [] )
 
 if wsids:
@@ -108,3 +108,4 @@ if wsids:
     print execute(usid, 'project.worksheet', 'read', id,['name','date'] )
     print execute(usid, 'project.worksheet', 'write', id,{'date':'2019-1-1'} )
     print execute(usid, 'project.worksheet', 'read', id,['name','date'] )
+"""
