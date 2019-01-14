@@ -85,15 +85,7 @@ class Work(models.Model):
     
     uom_id = fields.Many2one('uom.uom', 'Unit of Measure')
     
-    
-    @api.model
-    def _default_qty(self):
-        if rec.work_type == 'group':
-            return 1
-            
-        return 0.0
-    
-    qty = fields.Float('Planed Quantity', default=_default_qty)
+    qty = fields.Float('Planed Quantity', default=0.0)
     
     price = fields.Float('Price', default=0.0 )
     amount = fields.Float('Planed Amount', default=0.0, compute='_compute_amount' )
@@ -103,6 +95,8 @@ class Work(models.Model):
     def _set_price(self):
         for rec in self:
             if rec.work_type == 'group' or ( rec.work_type == 'node' and rec.child_ids ):
+                if not rec.qty:
+                    rec.qty = 1
                 childs = rec.search([('id','child_of', rec.id), ('child_ids','=',False)])
                 amount =  sum( childs.mapped('amount') )
                 rec.price = amount and rec.qty and amount / rec.qty or 0
