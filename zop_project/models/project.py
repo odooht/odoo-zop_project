@@ -98,8 +98,8 @@ class Work(models.Model):
     price = fields.Float('Price', default=0.0 )
     amount = fields.Float('Planed Amount', default=0.0, compute='_compute_amount' )
     
-    @api.multi
-    @api.onchange('child_ids.amount')
+    #@api.multi
+    #@api.onchange('child_ids.amount')
     def _set_price(self):
         for rec in self:
             if rec.work_type == 'group' or ( rec.work_type == 'node' and rec.child_ids ):
