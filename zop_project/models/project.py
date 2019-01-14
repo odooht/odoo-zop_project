@@ -113,7 +113,7 @@ class Work(models.Model):
         
         return ret
 
-    @api.multi
+    @api.model
     def create(self,vals):
         work = super(Work, self).create(vals)
         work._set_full_name()
