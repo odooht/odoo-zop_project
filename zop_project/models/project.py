@@ -49,7 +49,7 @@ class Work(models.Model):
     full_name = fields.Char('Full Name')
     
     @api.multi
-    @api.onchang('name','parent_id.full_name')
+    @api.onchange('name','parent_id.full_name')
     def _set_full_name(self):
         for rec in self:
             if rec.parent_id:
@@ -89,7 +89,7 @@ class Work(models.Model):
     amount = fields.Float('Planed Amount', default=0.0, compute='_compute_amount' )
     
     @api.multi
-    @api.onchang('child_ids.amount')
+    @api.onchange('child_ids.amount')
     def _set_price(self):
         for rec in self:
             if rec.work_type == 'group' or ( rec.work_type == 'node' and rec.child_ids ):
@@ -146,7 +146,7 @@ class Work(models.Model):
                 rec.amount = rec.amount_me
     
     @api.multi
-    @api.onchang('child_ids.amount')
+    @api.onchange('child_ids.amount')
     def _set_amount_childs(self):
         for rec in self:
             rec.amount_childs = sum(rec.childs.mapped('amount') )
@@ -183,7 +183,7 @@ class Worksheet(models.Model):
         ], string='Status', default='draft')
 
     @api.multi
-    @api.onchang('date','number','work_id.code')
+    @api.onchange('date','number','work_id.code')
     def _set_code(self):
         for rec in self:
             rec.code = ( rec.work_id.code or '' ) + '.' + (
@@ -191,7 +191,7 @@ class Worksheet(models.Model):
                          str( rec.number or 0 ) )
 
     @api.multi
-    @api.onchang('date','number','work_id.name')
+    @api.onchange('date','number','work_id.name')
     def _set_name(self):
         for rec in self:
             rec.name = ( rec.work_id.name or '' ) + '.' + (
@@ -199,7 +199,7 @@ class Worksheet(models.Model):
                          str( rec.number or 0 ) )
 
     @api.multi
-    @api.onchang('date','number','work_id.name')
+    @api.onchange('date','number','work_id.name')
     def _set_full_name(self):
         for rec in self:
             rec.full_name = ( rec.work_id.full_name or '' ) + '.' + (
@@ -262,13 +262,13 @@ class Workfact(models.Model):
     amount = fields.Float('Planed Amount', default=0.0, related='work_id.amount')
 
     @api.multi
-    @api.onchang('daykey','work_id.name')
+    @api.onchange('daykey','work_id.name')
     def _set_name(self):
         for rec in self:
             rec.name = ( rec.work_id.name or '' ) + '.' + str(rec.daykey)
 
     @api.multi
-    @api.onchang('daykey','work_id.full_name')
+    @api.onchange('daykey','work_id.full_name')
     def _set_full_name(self):
         for rec in self:
             rec.full_name = ( rec.work_id.full_name or '' ) + '.' + str(rec.daykey)
@@ -284,13 +284,13 @@ class Workfact(models.Model):
     qty_close = fields.Float('Close Quantity', default=0.0, compute='_compute_qty_close' )
 
     @api.multi
-    @api.onchang('worksheet_ids.qty')
+    @api.onchange('worksheet_ids.qty')
     def _set_qty_delta(self):
         for rec in self:
             rec.qty_delta = sum(rec.worksheet_ids.mapped('qty') )
 
     @api.multi
-    @api.onchang('last_workfact_id.qty_close')
+    @api.onchange('last_workfact_id.qty_close')
     def _set_qty_open(self):
         for rec in self:
             if rec.last_workfact_id:
