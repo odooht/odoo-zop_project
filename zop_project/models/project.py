@@ -103,7 +103,7 @@ class Work(models.Model):
         for rec in self:
             rec.amount = rec.qty * rec.price
 
-    @qpi.multi
+    @api.multi
     def write(self,vals):
         ret = super(Work, self).write(vals)
         if vals.get('name'):
@@ -113,7 +113,7 @@ class Work(models.Model):
         
         return ret
 
-    @qpi.multi
+    @api.multi
     def create(self,vals):
         work = super(Work, self).create(vals)
         work._set_full_name()
