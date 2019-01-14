@@ -64,10 +64,32 @@ class Work(models.Model):
     
     uom_id = fields.Many2one('uom.uom', 'Unit of Measure')
     qty = fields.Float('Planed Quantity', default=0.0)
-    price = fields.Float('Price', default=0.0 )
+    price_me = fields.Float('Price', default=0.0 )
+    price_childs = fields.Float('Price', default=0.0,compute='_compute_price_childs' )
+    price = fields.Float('Price', default=0.0,compute='_compute_price' )
+    
     amount_me = fields.Float('Planed Amount by Me', default=0.0, compute='_compute_amount_me')
     amount_childs = fields.Float('Planed Amount by Childs', default=0.0)
     amount = fields.Float('Planed Amount', default=0.0, compute='_compute_amount')
+
+    @api.multi
+    @api.depends('qty','amount_childs')
+    def _compute_price_childs(self):
+        for rec in self:
+            rec.price_childs = rec.amount_childs and rec.qty and rec.amount_childs / rec.qty or 0
+    
+    @api.multi
+    @api.depends('qty','price')
+    def _compute_price(self):
+        for rec in self:
+            rec.price = rec.qty * rec.price
+            if rec.work_type == 'item':
+                rec.price = rec.price_me
+            elif rec.child_ids:
+                rec.price = rec.price_childs
+            else:
+                rec.price = rec.price_me
+    
 
     @api.multi
     @api.depends('qty','price')

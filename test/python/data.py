@@ -8,10 +8,10 @@ records['project.project'] = [{'code':'BJ16.17','name': '北京地铁16号线17�
 records['project.work'] = [
   {'project_id': 'BJ16.17', 'code': '1',       'name':'某某车站', },
   {'project_id': 'BJ16.17', 'code': '1.1',     'name':'车站附属', },
-  {'project_id': 'BJ16.17', 'code': '1.1.1',   'name':'1号风井',  'work_type': 'node', 'uom_id': 'm', 'price': 10000,'qty':28.91 },
-]
-
-""" 
+  {'project_id': 'BJ16.17', 'code': '1.1.1',   'name':'1号风井',  'work_type': 'node', 'uom_id': 'm',        'price': 10000,'qty':28.91 },
+  {'project_id': 'BJ16.17', 'code': '1.1.1.1', 'name':'挖土方',   'work_type': 'item', 'uom_id': 'Liter(s)', 'price': 2,  'qty':100000 },
+  {'project_id': 'BJ16.17', 'code': '1.1.1.1', 'name':'立拱架',   'work_type': 'item', 'uom_id': 'Unit(s)',  'price': 100,'qty':100 },
+  {'project_id': 'BJ16.17', 'code': '1.1.1.1', 'name':'喷砼',     'work_type': 'item', 'uom_id': 'kg',       'price': 9,  'qty':10000 },
   {'project_id': 'BJ16.17', 'code': '1.1.2',   'name':'1号横通道', },
   {'project_id': 'BJ16.17', 'code': '1.1.2.1', 'name':'第1层', 'work_type': 'node', 'uom_id': 'm', 'price': 8000,'qty':59.26 },
   {'project_id': 'BJ16.17', 'code': '1.1.2.2', 'name':'第2层', 'work_type': 'node', 'uom_id': 'm', 'price': 8000,'qty':59.26 },
@@ -149,4 +149,3 @@ records['project.work'] = [
   {'project_id': 'BJ16.17', 'code': '2.3.2.4', 'name':'分段开挖4', 'work_type': 'node', 'uom_id': 'm', 'price': 5000,'qty':107.18 },
 ]
 
-""" 
