@@ -117,19 +117,27 @@ class Work(models.Model):
             else:
                 rec.amount = rec.amount_me
     
+    @api.one
+    @api.onchang('name','parent_id.full_name')
     def _set_full_name(self):
         if self.parent_id:
             self.full_name = self.parent_id.full_name + '.' + self.name
         else:
             self.full_name = self.name
 
+    @api.one
+    @api.onchang('child_ids.amount')
+    def _set_amount_childs(self):
+        childs = self.search([('id','child_of', self.id), ('child_ids','=',False)])
+        self.amount_childs =  sum( childs.mapped('amount') )
+            
+    """ 
     def _set_amount_childs(self):
         parents = self.search([('id','parent_of', [self.id])])
         parents |= self
         for parent in parents:
             childs = self.search([('id','child_of', parent.id), ('child_ids','=',False)])
             parent.amount_childs =  sum( childs.mapped('amount') )
-
 
     @api.multi
     def write(self, vals):
@@ -163,6 +171,8 @@ class Work(models.Model):
             work.parent_id._set_amount_childs()
         
         return work
+    """
+
 
     worksheet_ids = fields.One2many('project.worksheet','work_id',string='Worksheets')
 
@@ -212,44 +222,6 @@ class Worksheet(models.Model):
         self.full_name = ( self.work_id.full_name or '' ) + '.' + (
                       self.date and fields.Date.to_string( self.date ) or '' ) + '.' + (
                       str( self.number or 0 ) )
-
-    @api.multi
-    def write(self, vals):
-        old_date = self.date
-        old_code = self.code
-        old_work = self.work_id
-        
-        ret = super(Worksheet, self).write(vals)
-        
-        """ 
-        if old_work != self.work_id or old_date != self.date or old_code != self.code:
-            if not vals.get('code'):
-                self._set_code()
-                
-            if not vals.get('name'):
-                self._set_name()
-                
-            if not vals.get('full_name'):
-                self._set_full_name()
-        """
-        return ret
-
-    @api.model
-    def create(self, vals):
-        worksheet = super(Worksheet, self).create(vals)
-        
-        """ 
-        if not vals.get('code'):
-            worksheet._set_code()
-
-        if not vals.get('name'):
-            worksheet._set_name()
-
-        if not vals.get('full_name'):
-            worksheet._set_full_name()
-        """
-        
-        return worksheet
 
 class DateDimention(models.Model):
     _name = "olap.dim.date"
