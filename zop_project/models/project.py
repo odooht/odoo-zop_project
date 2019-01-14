@@ -94,9 +94,10 @@ class Work(models.Model):
     def _set_price(self):
         for rec in self:
             if rec.work_type == 'group' or ( rec.work_type == 'node' and rec.child_ids ):
-                amount = sum(rec.childs.mapped('amount') )
-            rec.price = amount and rec.qty and amount / rec.qty or 0
-    
+                childs = rec.search([('id','child_of', rec.id), ('child_ids','=',False)])
+                amount =  sum( childs.mapped('amount') )
+                rec.price = amount and rec.qty and amount / rec.qty or 0
+
     @api.multi
     @api.depends('qty','price')
     def _compute_amount(self):
@@ -105,9 +106,19 @@ class Work(models.Model):
 
     @api.multi
     def write(self,vals):
+        old_parent_id = self.parent_id.id
         ret = super(Work, self).write(vals)
         if vals.get('name') or vals.get('parent_id'):
             self._set_full_name()
+
+        if vals.get('parent_id') or val.get('price') or val.get('qty'):
+            old_parents = self.search([('id','parent_of', old_parent_id)])
+            parents = self.search([('id','parent_of', self.id)])
+            parents |= old_parents
+            
+            for parent in parents:
+                parent._set_price()
+
         
         return ret
 
@@ -115,6 +126,11 @@ class Work(models.Model):
     def create(self,vals):
         work = super(Work, self).create(vals)
         work._set_full_name()
+        
+        parents = work.search([('id','parent_of', work.id)])
+        for parent in parents:
+            parent._set_price()
+            
         return work
 
 
