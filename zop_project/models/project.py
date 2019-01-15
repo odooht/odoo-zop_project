@@ -137,7 +137,7 @@ class Work(models.Model):
         #old_amout = self.amount
         
         set_full_name = vals.get('set_full_name')
-        set_parent_amount = vals.get('set_parent_amount')
+        set_amount = vals.get('set_amount')
         
         if set_full_name:
             del vals['set_full_name']
