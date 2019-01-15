@@ -204,6 +204,7 @@ class Worksheet(models.Model):
     @api.multi
     def set_name(self):
         for rec in self:
+            rec._set_code()
             rec._set_name()
             rec._set_full_name()
 
@@ -214,7 +215,7 @@ class Worksheet(models.Model):
         if set_name:
             del vals['set_name']
         
-        ret = super(Work, self).write(vals)
+        ret = super(Worksheet, self).write(vals)
         
         if set_name:
             self.set_name()
