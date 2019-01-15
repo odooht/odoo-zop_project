@@ -327,7 +327,7 @@ class Workfact(models.Model):
         
     qty_close = fields.Float('Close Quantity', default=0.0, compute='_compute_qty_close' )
 
-    def get_childs(type):
+    def get_childs(self,type):
         if type=='date':
             dates = rec.env['olap.dim.date'].get_childs(self.date_type, self.date_id)
             return self.search([('id','in',dates.ids)])
