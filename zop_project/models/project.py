@@ -424,7 +424,7 @@ class Workfact(models.Model):
             ('date','<', date)], order='date' )
                 
         keys = last_dimdates.mapped( date_type + 'key' )
-        dt_ids = [ for self.env['olap.dim.date'].get_date_by_key(key,date_type).id in keys ]
+        dt_ids = [ self.env['olap.dim.date'].get_date_by_key(key,date_type).id for key in keys ]
         last_dimdates = last_dimdates.filtered( lambda r: r.id in dt_ids )
         
         for last_dimdate in last_dimdates:
