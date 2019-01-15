@@ -333,7 +333,7 @@ class Workfact(models.Model):
             return self.search([
                 ('date_id','in',dates.ids), 
                 ('date_type','=',self.date_type),
-                ('work_id','=',self.work_id ) ])
+                ('work_id','=',self.work_id.id ) ])
         else:
             pass
 
