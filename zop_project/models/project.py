@@ -139,7 +139,7 @@ class Work(models.Model):
         work = super(Work, self).create(vals)
         work._set_full_name()
         
-        if work.amount and parent_id:
+        if work.amount and work.parent_id:
             parents = work.search([('id','parent_of', work.id)])
             for parent in parents:
                 parent._set_price()
