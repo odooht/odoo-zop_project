@@ -258,10 +258,15 @@ class DateDimention(models.Model):
     day = fields.Integer(help='d')
 
     @api.model
-    def get_date_by_key(self,key,date_type):
+    def get_by_key(self,date_type,key ):
         dimdates = self.search([(date_type + 'key','=', key )])
         min_date = min(dimdates.mapped('date'))
         return self.search([('date','=', min_date)], limit=1)
+
+    @api.model
+    def get_childs(self,date_type, parent ):
+        attr = date_type + 'key'
+        return self.search([(attr,'=', getattr(parent, attr))])
 
 class Workfact(models.Model):
     _name = "project.workfact"
@@ -322,6 +327,13 @@ class Workfact(models.Model):
         
     qty_close = fields.Float('Close Quantity', default=0.0, compute='_compute_qty_close' )
 
+    def get_childs(type):
+        if type=='date':
+            dates = rec.env['olap.dim.date'].get_childs(self.date_type, self.date_id)
+            return self.search([('id','in',dates.ids)])
+        else:
+            pass
+
     @api.multi
     @api.onchange('worksheet_ids.qty')
     def _set_qty_delta(self):
@@ -330,8 +342,7 @@ class Workfact(models.Model):
                 if rec.date_type == 'day':
                     rec.qty_delta = sum(rec.worksheet_ids.mapped('qty') )
                 else:
-                    # sum  from day
-                    rec.qty_delta = 0
+                    rec.qty_delta = sum(rec.get_childs('date').mapped('qty_delta'))
             else:
                 #  no qty for date_type=group
                 pass
@@ -396,7 +407,7 @@ class Workfact(models.Model):
     def find_or_create(self,work_id,date,date_type ):
         dimdate = self.env['olap.dim.date'].search([('date','=', date)], limit=1)
         key = dimdate.mapped( date_type + 'key' )
-        dimdate = self.env['olap.dim.date'].get_date_by_key(key,date_type)
+        dimdate = self.env['olap.dim.date'].get_by_key(date_type,key)
         
         fact = self.search([
             ('work_id','=', work_id.id),
@@ -424,7 +435,7 @@ class Workfact(models.Model):
             ('date','<', date)], order='date' )
                 
         keys = last_dimdates.mapped( date_type + 'key' )
-        dt_ids = [ self.env['olap.dim.date'].get_date_by_key(key,date_type).id for key in keys ]
+        dt_ids = [ self.env['olap.dim.date'].get_by_key(date_type,key).id for key in keys ]
         last_dimdates = last_dimdates.filtered( lambda r: r.id in dt_ids )
         
         for last_dimdate in last_dimdates:
