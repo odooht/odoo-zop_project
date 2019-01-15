@@ -17,7 +17,7 @@ def search_one(model, domain):
 
 def find(model, domain, record=None ):
     ids = execute(usid, model, 'search', domain, limit=1)
-    #print 'find',model, domain, record, ids
+    print 'find',model, domain, record, ids
 
     if not ids:
         id = execute(usid, model, 'create', record )
@@ -126,6 +126,7 @@ def date_multi():
 
 
 def worksheet_one(rec):
+    rec = rec.copy()
     domain = [('code','=',rec['work_id']),('project_id','=',project_id) ]
     work_id = search_one('project.work', domain )
     rec['work_id'] = work_id
@@ -146,7 +147,10 @@ def worksheet_one_fname(rec):
     nrec = {'set_name':1 }
     domain = [('code','=',rec['work_id']),('project_id','=',project_id) ]
     work_id = search_one('project.work', domain )
-    
+    print 'fname,search work', domain, work_id
+    if not work_id:
+        print 'error'
+        
     model = 'project.worksheet'
     domain = [('date','=',rec['date']),('number','=',rec['number']),('work_id','=',work_id) ]
     
@@ -196,7 +200,10 @@ worksheet_multi()
 worksheet_fname()
 
 """
-
+print 'create worksheet'
+worksheet_multi()
+print 'name worksheet'
+worksheet_fname()
 worksheet_post()
 
 """ 
