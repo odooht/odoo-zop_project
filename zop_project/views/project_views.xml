@@ -137,12 +137,13 @@
             <field name="model">project.worksheet</field>
             <field name="arch" type="xml">
                 <tree string="Worksheets">
+                    <field name="full_name"/>
                     <field name="project_id"/>
                     <field name="work_id"/>
-                    <field name="full_name"/>
                     <field name="code"/>
-                    <field name="uom_id"/>
                     <field name="date"/>
+                    <field name="number"/>
+                    <field name="uom_id"/>
                     <field name="qty"/>
                 </tree>
             </field>

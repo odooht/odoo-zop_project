@@ -126,12 +126,13 @@ def date_multi():
 
 
 def worksheet_one(rec):
+    domain = [('code','=',rec['work_id']),('project_id','=',project_id) ]
+    work_id = search_one('project.work', domain )
+    rec['work_id'] = work_id
+    
     model = 'project.worksheet'
-    
-    print rec
-    
-    domain = [('date','=',rec['date']) ]
-    id = 1 #find(model, domain, record=rec )
+    domain = [('date','=',rec['date']),('number','=',rec['number']),('work_id','=',work_id) ]
+    id = find(model, domain, record=rec )
     print id
     if id:
         #print execute(usid, model, 'read', id)
@@ -141,21 +142,43 @@ def worksheet_multi():
     for rec in records['project.worksheet']:
         worksheet_one(rec)
 
+def worksheet_one_fname(rec):
+    nrec = {'set_name':1 }
+    domain = [('code','=',rec['work_id']),('project_id','=',project_id) ]
+    work_id = search_one('project.work', domain )
+    
+    model = 'project.worksheet'
+    domain = [('date','=',rec['date']),('number','=',rec['number']),('work_id','=',work_id) ]
+    
+    id = find(model, domain, record=nrec )
+    print id
+    if id:
+        #print execute(usid, model, 'read', id)
+        pass
+
+def worksheet_fname():
+    for rec in records['project.worksheet']:
+        worksheet_one_fname(rec)
+    
 
 
 usid, uid = get_user()
 print usid, uid
 
 project_id = project_one()
-#work2_multi()
-#work2_multi_parent()
-#work3_fname()
-#work3_amount()
 
-#date_multi()
+""" 
+work2_multi()
+work2_multi_parent()
+work3_fname()
+work3_amount()
 
+date_multi()
 worksheet_multi()
 
+"""
+
+worksheet_fname()
 
 """ 
 wsids = execute(usid, 'project.worksheet', 'search', [] )

@@ -201,6 +201,26 @@ class Worksheet(models.Model):
                               rec.date and fields.Date.to_string( rec.date ) or '' ) + '.' + (
                               str( rec.number or 0 ) )
 
+    @api.multi
+    def set_name(self):
+        for rec in self:
+            rec._set_name()
+            rec._set_full_name()
+
+    @api.multi
+    def write(self,vals):
+        set_name = vals.get('set_name')
+        
+        if set_name:
+            del vals['set_name']
+        
+        ret = super(Work, self).write(vals)
+        
+        if set_name:
+            self.set_name()
+        
+        return ret
+
 class DateDimention(models.Model):
     _name = "olap.dim.date"
     _description = "OLAP Dimention Date"
