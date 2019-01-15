@@ -330,7 +330,10 @@ class Workfact(models.Model):
     def get_childs(self,type):
         if type=='date':
             dates = self.env['olap.dim.date'].get_childs(self.date_type, self.date_id)
-            return self.search([('id','in',dates.ids)])
+            return self.search([
+                ('date_id','in',dates.ids), 
+                ('date_type','=',self.date_type),
+                ('work_id','=',self.work_id ) ])
         else:
             pass
 
@@ -406,7 +409,7 @@ class Workfact(models.Model):
     @api.model
     def find_or_create(self,work_id,date,date_type ):
         dimdate = self.env['olap.dim.date'].search([('date','=', date)], limit=1)
-        key = dimdate.mapped( date_type + 'key' )
+        key = getattr(dimdate,date_type + 'key')
         dimdate = self.env['olap.dim.date'].get_by_key(date_type,key)
         
         fact = self.search([
