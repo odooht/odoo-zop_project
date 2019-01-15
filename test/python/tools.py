@@ -79,6 +79,38 @@ def work2_multi_parent():
     for rec in records['project.work']:
         work2_one_parent(rec)
 
+
+
+def work3_one_fname(rec):
+    nrec = {'set_full_name':1 }
+    model = 'project.work'
+    domain = [('code','=',rec['code']),('project_id','=',project_id) ]
+    id = find(model, domain, record=nrec )
+    print id
+    if id:
+        #print execute(usid, model, 'read', id)
+        pass
+
+def work3_fname():
+    for rec in records['project.work']:
+        work3_one_fname(rec)
+    
+def work3_one_amount(rec):
+    nrec = {  'set_amount':1}
+    model = 'project.work'
+    domain = [('code','=',rec['code']),('project_id','=',project_id) ]
+    id = find(model, domain, record=nrec )
+    print id
+    if id:
+        #print execute(usid, model, 'read', id)
+        pass
+
+
+def work3_amount():
+    for rec in records['project.work']:
+        work3_one_amount(rec)
+
+
 def date_one(rec):
     model = 'olap.dim.date'
     domain = [('date','=',rec['date']) ]
@@ -98,7 +130,11 @@ print usid, uid
 project_id = project_one()
 work2_multi()
 work2_multi_parent()
+work3_fname()
+#work3_amount()
+
 #date_multi()
+
 
 """ 
 wsids = execute(usid, 'project.worksheet', 'search', [] )

@@ -48,20 +48,6 @@ class Work(models.Model):
     code = fields.Char("Code"  )
     full_name = fields.Char('Full Name')
     
-    @api.multi
-    @api.onchange('name','parent_id.full_name')
-    def _set_full_name(self):
-        for rec in self:
-            fname = []
-            if rec.parent_id:
-                pname = rec.parent_id.full_name
-                fname.append( pname and pname or '' )
-                
-            fname.append(rec.name and rec.name or '') 
-                
-            rec.full_name = '.'.join(fname)
-                
-
     date_from = fields.Datetime(string='Starting Date')
     date_thru = fields.Datetime(string='Ending Date' )
     project_id = fields.Many2one('project.project', string='Project')
@@ -71,15 +57,6 @@ class Work(models.Model):
     child_ids = fields.One2many('project.work', 'parent_id', string="Sub-works")
     subwork_count = fields.Integer("Sub-work count", compute='_compute_subwork_count')
     parent_path = fields.Char(index=True)
-
-    @api.depends('child_ids')
-    def _compute_subwork_count(self):
-        """ Note: since we accept only one level subwork, we can use a read_group here """
-        work_data = self.env['project.work'].read_group([('parent_id', 'in', self.ids)], ['parent_id'], ['parent_id'])
-        mapping = dict((data['parent_id'][0], data['parent_id_count']) for data in work_data)
-        for work in self:
-            work.subwork_count = mapping.get(work.id, 0)
-
 
     work_type = fields.Selection([
         ('group','Group'),
@@ -94,6 +71,39 @@ class Work(models.Model):
     price = fields.Float('Price', default=0.0 )
     amount = fields.Float('Planed Amount', default=0.0, compute='_compute_amount' )
     
+    @api.multi
+    @api.onchange('name','parent_id.full_name')
+    def _set_full_name(self):
+        for rec in self:
+            fname = []
+            if rec.parent_id:
+                pname = rec.parent_id.full_name
+                fname.append( pname and pname or '' )
+            fname.append(rec.name and rec.name or '') 
+            rec.full_name = '.'.join(fname)
+                
+    @api.multi
+    def set_full_name(self):
+        for rec in self:
+            fname = []
+            if rec.parent_id:
+                pname = rec.parent_id.full_name
+                if not pname:
+                    rec.parent_id.set_full_name()
+                    pname = rec.parent_id.full_name or ''
+                fname.append( pname and pname or '' )
+            fname.append(rec.name and rec.name or '') 
+            rec.full_name = '.'.join(fname)
+            
+
+    @api.depends('child_ids')
+    def _compute_subwork_count(self):
+        """ Note: since we accept only one level subwork, we can use a read_group here """
+        work_data = self.env['project.work'].read_group([('parent_id', 'in', self.ids)], ['parent_id'], ['parent_id'])
+        mapping = dict((data['parent_id'][0], data['parent_id_count']) for data in work_data)
+        for work in self:
+            work.subwork_count = mapping.get(work.id, 0)
+
     @api.multi
     @api.onchange('child_ids.amount')
     def _set_price(self):
@@ -112,13 +122,39 @@ class Work(models.Model):
             rec.amount = rec.qty * rec.price
 
     @api.multi
+    def set_amount(self):
+        for rec in self:
+            rec._set_price()
+            parents = rec.search([('id','parent_of', rec.id)])
+            for parent in parents:
+                parent._set_price()
+
+
+    @api.multi
     def write(self,vals):
-        old_parent_id = self.parent_id.id
-        old_name = self.name
-        old_amout = self.amount
+        #old_parent_id = self.parent_id.id
+        #old_name = self.name
+        #old_amout = self.amount
+        
+        set_full_name = vals.get('set_full_name')
+        set_parent_amount = vals.get('set_parent_amount')
+        
+        if set_full_name:
+            del vals['set_full_name']
+        
+        if set_amount:
+            del vals['set_amount']
         
         ret = super(Work, self).write(vals)
         
+        if set_full_name:
+            self.set_full_name()
+        
+        if set_amount:
+            self.set_amount()
+        
+        
+        """
         if old_name != self.name or old_parent_id != self.parent_id.id:
             self._set_full_name()
             
@@ -131,9 +167,11 @@ class Work(models.Model):
             for parent in parents:
                 parent._set_price()
 
+        """
         
         return ret
 
+    """ 
     @api.model
     def create(self,vals):
         work = super(Work, self).create(vals)
@@ -146,7 +184,6 @@ class Work(models.Model):
             
         return work
 
-    """ 
     price_me = fields.Float('Price Me', default=0.0 )
     price_childs = fields.Float('Price Childs', default=0.0,compute='_compute_price_childs' )
     price = fields.Float('Price', default=0.0,compute='_compute_price' )
