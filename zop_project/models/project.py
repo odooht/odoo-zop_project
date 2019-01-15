@@ -52,10 +52,14 @@ class Work(models.Model):
     @api.onchange('name','parent_id.full_name')
     def _set_full_name(self):
         for rec in self:
+            fname = []
             if rec.parent_id:
-                rec.full_name = rec.parent_id.full_name + '.' + rec.name
-            else:
-                rec.full_name = rec.name
+                pname = rec.parent_id.full_name:
+                fname.append( pname and pname or '' )
+                
+            fname.append(rec.name and rec.name or '') 
+                
+            rec.full_name = '.'.join(fname)
                 
 
     date_from = fields.Datetime(string='Starting Date')
