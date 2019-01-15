@@ -332,7 +332,7 @@ class Workfact(models.Model):
             dates = self.env['olap.dim.date'].get_childs(self.date_type, self.date_id)
             return self.search([
                 ('date_id','in',dates.ids), 
-                ('date_type','=',self.date_type),
+                ('date_type','=', 'day'),
                 ('work_id','=',self.work_id.id ) ])
         else:
             pass
