@@ -124,16 +124,37 @@ def date_multi():
     for rec in records['olap.dim.date']:
         date_one(rec)
 
+
+def worksheet_one(rec):
+    model = 'project.worksheet'
+    
+    print rec
+    
+    domain = [('date','=',rec['date']) ]
+    id = 1 #find(model, domain, record=rec )
+    print id
+    if id:
+        #print execute(usid, model, 'read', id)
+        pass
+
+def worksheet_multi():
+    for rec in records['project.worksheet']:
+        worksheet_one(rec)
+
+
+
 usid, uid = get_user()
 print usid, uid
 
 project_id = project_one()
-work2_multi()
-work2_multi_parent()
-work3_fname()
+#work2_multi()
+#work2_multi_parent()
+#work3_fname()
 #work3_amount()
 
 #date_multi()
+
+worksheet_multi()
 
 
 """ 

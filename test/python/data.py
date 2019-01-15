@@ -12,9 +12,6 @@ records['project.work'] = [
   {'project_id': 'BJ16.17', 'code': '1.1.1.1', 'name':'挖土方',   'work_type': 'item', 'uom_id': 'Liter(s)', 'price': 2,  'qty':100000 },
   {'project_id': 'BJ16.17', 'code': '1.1.1.2', 'name':'立拱架',   'work_type': 'item', 'uom_id': 'Unit(s)',  'price': 100,'qty':100 },
   {'project_id': 'BJ16.17', 'code': '1.1.1.3', 'name':'喷砼',     'work_type': 'item', 'uom_id': 'kg',       'price': 9,  'qty':10000 },
-]
-
-"""
   {'project_id': 'BJ16.17', 'code': '1.1.2',   'name':'1号横通道', },
   {'project_id': 'BJ16.17', 'code': '1.1.2.1', 'name':'第1层', 'work_type': 'node', 'uom_id': 'm', 'price': 8000,'qty':59.26 },
   {'project_id': 'BJ16.17', 'code': '1.1.2.2', 'name':'第2层', 'work_type': 'node', 'uom_id': 'm', 'price': 8000,'qty':59.26 },
@@ -152,10 +149,7 @@ records['project.work'] = [
   {'project_id': 'BJ16.17', 'code': '2.3.2.4', 'name':'分段开挖4', 'work_type': 'node', 'uom_id': 'm', 'price': 5000,'qty':107.18 },
 ]
 
-"""
-
 records['olap.dim.date'] = []
-
 
 def date_dim():
     import datetime
@@ -180,3 +174,19 @@ def date_dim():
         })
     
 date_dim()
+
+records['project.worksheet'] = [
+  {'work_id': '1.1.1',   'date':'2019-1-1',  'number': 1, 'qty':2.2 },
+  {'work_id': '1.1.1',   'date':'2019-1-1',  'number': 2, 'qty':2.2 },
+  {'work_id': '1.1.1',   'date':'2019-1-2',  'number': 1, 'qty':2.3 },
+  {'work_id': '1.1.1',   'date':'2019-1-3',  'number': 1, 'qty':2.1 },
+  {'work_id': '1.1.1',   'date':'2019-1-6',  'number': 1, 'qty':2.2 },
+  {'work_id': '1.1.1',   'date':'2019-1-8',  'number': 1, 'qty':2.3 },
+  {'work_id': '1.1.1',   'date':'2019-1-12', 'number': 1, 'qty':2.4 },
+  {'work_id': '1.1.1',   'date':'2019-1-20', 'number': 1, 'qty':2.2 },
+  {'work_id': '1.1.1',   'date':'2019-2-1',  'number': 1, 'qty':2.02 },
+  {'work_id': '1.1.1',   'date':'2019-3-12', 'number': 1, 'qty':2.03 },
+  {'work_id': '1.1.1',   'date':'2019-6-1',  'number': 1, 'qty':2.01 },
+  {'work_id': '1.1.1',   'date':'2019-8-2',  'number': 1, 'qty':2.03 },
+  {'work_id': '1.1.1',   'date':'2019-12-1', 'number': 1, 'qty':2.06 },
+]

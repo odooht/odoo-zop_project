@@ -71,6 +71,8 @@ class Work(models.Model):
     price = fields.Float('Price', default=0.0 )
     amount = fields.Float('Planed Amount', default=0.0, compute='_compute_amount' )
     
+    worksheet_ids = fields.One2many('project.worksheet','work_id',string='Worksheets')
+
     @api.multi
     @api.onchange('name','parent_id.full_name')
     def _set_full_name(self):
@@ -129,13 +131,8 @@ class Work(models.Model):
             for parent in parents:
                 parent._set_price()
 
-
     @api.multi
     def write(self,vals):
-        #old_parent_id = self.parent_id.id
-        #old_name = self.name
-        #old_amout = self.amount
-        
         set_full_name = vals.get('set_full_name')
         set_amount = vals.get('set_amount')
         
@@ -152,91 +149,8 @@ class Work(models.Model):
         
         if set_amount:
             self.set_amount()
-        
-        
-        """
-        if old_name != self.name or old_parent_id != self.parent_id.id:
-            self._set_full_name()
-            
-        if old_parent_id != self.parent_id.id or old_amout != self.amount:
-            parents = self.search([('id','parent_of', self.id)])
-            if old_parent_id:
-                old_parents = self.search([('id','parent_of', old_parent_id)])
-                parents |= old_parents
-            
-            for parent in parents:
-                parent._set_price()
 
-        """
-        
         return ret
-
-    """ 
-    @api.model
-    def create(self,vals):
-        work = super(Work, self).create(vals)
-        work._set_full_name()
-        
-        if work.amount and work.parent_id:
-            parents = work.search([('id','parent_of', work.id)])
-            for parent in parents:
-                parent._set_price()
-            
-        return work
-
-    price_me = fields.Float('Price Me', default=0.0 )
-    price_childs = fields.Float('Price Childs', default=0.0,compute='_compute_price_childs' )
-    price = fields.Float('Price', default=0.0,compute='_compute_price' )
-    
-    amount_me = fields.Float('Planed Amount by Me', default=0.0, compute='_compute_amount_me')
-    amount_childs = fields.Float('Planed Amount by Childs', default=0.0)
-    amount = fields.Float('Planed Amount', default=0.0, compute='_compute_amount')
-
-    @api.multi
-    @api.depends('qty','amount_childs')
-    def _compute_price_childs(self):
-        for rec in self:
-            rec.price_childs = rec.amount_childs and rec.qty and rec.amount_childs / rec.qty or 0
-    
-    @api.multi
-    @api.depends('qty','price')
-    def _compute_price(self):
-        for rec in self:
-            
-            if rec.work_type == 'item':
-                rec.price = rec.price_me
-            elif rec.child_ids:
-                rec.price = rec.price_childs
-            else:
-                rec.price = rec.price_me
-    
-
-    @api.multi
-    @api.depends('qty','price')
-    def _compute_amount_me(self):
-        for rec in self:
-            rec.amount_me = rec.qty * rec.price
-    
-    @api.multi
-    @api.depends('amount_me','work_type','amount_childs')
-    def _compute_amount(self):
-        for rec in self:
-            if rec.work_type == 'group':
-                rec.amount = rec.amount_childs
-            else:
-                rec.amount = rec.amount_me
-    
-    @api.multi
-    @api.onchange('child_ids.amount')
-    def _set_amount_childs(self):
-        for rec in self:
-            rec.amount_childs = sum(rec.childs.mapped('amount') )
-            #childs = self.search([('id','child_of', self.id), ('child_ids','=',False)])
-            #self.amount_childs =  sum( childs.mapped('amount') )
-    """
-
-    worksheet_ids = fields.One2many('project.worksheet','work_id',string='Worksheets')
-
 
 class Worksheet(models.Model):
     _name = "project.worksheet"
@@ -398,67 +312,7 @@ class Workfact(models.Model):
             rec.rate = ( rec.amount and rec.amount_close 
                        ) and ( rec.amount_close / rec.amount ) or 0.0
 
-    
-
-""" 
-    amount_open_me  = fields.Float('Open Amount by Me', default=0.0,compute='_compute_amount_open_me' )
-    amount_delta_me = fields.Float('Delta Amount by Me', default=0.0,compute='_compute_amount_delta_me' )
-    amount_close_me = fields.Float('Close Amount by Me', default=0.0,compute='_compute_amount_close_me' )
-
-    amount_open_childs  = fields.Float('Open Amount by childs', default=0.0 )
-    amount_delta_childs = fields.Float('Delta Amount by childs', default=0.0 )
-    amount_close_childs = fields.Float('Close Amount by childs', default=0.0 )
-
-    amount_open  = fields.Float('Open Amount by Me', default=0.0,compute='_compute_amount' )
-    amount_delta = fields.Float('Delta Amount by Me', default=0.0,compute='_compute_amount' )
-    amount_close = fields.Float('Close Amount by Me', default=0.0,compute='_compute_amount' )
-
-    rate = fields.Float('Rate', default=0.0, compute='_compute_rate'  )
-
-
-    @api.multi
-    @api.depends('qty_open','price')
-    def _compute_amount_open_me(self):
-        for rec in self:
-            rec.amount_open_me = rec.qty_open * rec.price
-    
-    @api.multi
-    @api.depends('qty_delta','price')
-    def _compute_amount_delta_me(self):
-        for rec in self:
-            rec.amount_delta_me = rec.qty_delta * rec.price
-    
-    @api.multi
-    @api.depends('qty_close','price')
-    def _compute_amount_close_me(self):
-        for rec in self:
-            rec.amount_close_me = rec.qty_close * rec.price
-
-
-    def _set_amount_childs(self):
-        child_worksheet_ids = self.work_id.child_ids.mapped('worksheet_ids')
+    #@api.multi
+    #def set_qty_delta(self):
         
-        open  = sum( child_worksheet_ids.mapped('amount_open_childs') )
-        delta = sum( child_worksheet_ids.mapped('amount_delta_childs') )
-        self.amount_open_childs  = open
-        self.amount_delta_childs = delta
-        self.amount_close_childs = open + delta
-        if self.parent_id:
-            self.parent_id._set_amount_childs()
     
-    @api.multi
-    @api.depends('amount_open_me','amount_delta_me','amount_close_me',
-                 'amount_open_childs','amount_delta_childs','amount_close_childs')
-    def _compute_amount(self):
-        for rec in self:
-            if rec.work_type == 'group':
-                rec.amount_open  = rec.amount_open_childs
-                rec.amount_delta = rec.amount_delta_childs
-                rec.amount_close = rec.amount_close_childs
-            else:
-                rec.amount_open  = rec.amount_open_me
-                rec.amount_delta = rec.amount_delta_me
-                rec.amount_close = rec.amount_close_me
-    
-   
-"""
