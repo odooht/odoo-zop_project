@@ -257,6 +257,11 @@ class DateDimention(models.Model):
     week = fields.Integer(help='w')
     day = fields.Integer(help='d')
 
+    @api.model
+    def get_date_by_key(self,key,date_type):
+        dimdates = self.search([(date_type + 'key','=', key )])
+        min_date = min(dimdates.mapped('date'))
+        return self.search([('date','=', min_date)], limit=1)
 
 class Workfact(models.Model):
     _name = "project.workfact"
@@ -321,16 +326,28 @@ class Workfact(models.Model):
     @api.onchange('worksheet_ids.qty')
     def _set_qty_delta(self):
         for rec in self:
-            rec.qty_delta = sum(rec.worksheet_ids.mapped('qty') )
+            if rec.work_type == 'node':
+                if rec.date_type == 'day':
+                    rec.qty_delta = sum(rec.worksheet_ids.mapped('qty') )
+                else:
+                    # sum  from day
+                    rec.qty_delta = 0
+            else:
+                #  no qty for date_type=group
+                pass
 
     @api.multi
     @api.onchange('last_workfact_id.qty_close')
     def _set_qty_open(self):
         for rec in self:
-            if rec.last_workfact_id:
-                rec.qty_open = rec.last_workfact_id.qty_close
+            if rec.work_type == 'node':
+                if rec.last_workfact_id:
+                    rec.qty_open = rec.last_workfact_id.qty_close
+                else:
+                    rec.qty_open = 0
             else:
-                rec.qty_open = 0
+                # no qty for group
+                pass
 
     @api.multi
     @api.depends('qty_delta','qty_open')
@@ -340,10 +357,26 @@ class Workfact(models.Model):
 
     amount_open  = fields.Float('Open Amount', default=0.0 )
     amount_delta = fields.Float('Delta Amount', default=0.0 )
-    amount_close = fields.Float('Close Amount', default=0.0 )
-    
+    amount_close = fields.Float('Close Amount', default=0.0, compute='_compute_amount_close' )
     rate = fields.Float('Rate', default=0.0, compute='_compute_rate'  )
     
+    @api.multi
+    def _set_amount(self):
+        for rec in self:
+            if rec.work_type == 'node':  
+                rec.amount_open = rec.qty_open * rec.price
+                rec.amount_delta = rec.qty_delta * rec.price
+                
+            else:
+                # sum from node
+                pass
+
+    @api.multi
+    @api.depends('amount_open','amount_delta')
+    def _compute_amount_close(self):
+        for rec in self:
+            self.amount_close = self.amount_open + self.amount_delta
+
     @api.multi
     @api.depends('amount','amount_close')
     def _compute_rate(self):
@@ -357,11 +390,14 @@ class Workfact(models.Model):
         fact._set_full_name()
         fact._set_name()
         return fact
-    
 
+    
     @api.model
     def find_or_create(self,work_id,date,date_type ):
         dimdate = self.env['olap.dim.date'].search([('date','=', date)], limit=1)
+        key = dimdate.mapped( date_type + 'key' )
+        dimdate = self.env['olap.dim.date'].get_date_by_key(key,date_type)
+        
         fact = self.search([
             ('work_id','=', work_id.id),
             ('date_id','=',dimdate.id),
@@ -387,14 +423,17 @@ class Workfact(models.Model):
             ('date','>', last_fact.date),
             ('date','<', date)], order='date' )
                 
+        keys = last_dimdates.mapped( date_type + 'key' )
+        dt_ids = [ for self.env['olap.dim.date'].get_date_by_key(key,date_type).id in keys ]
+        last_dimdates = last_dimdates.filtered( lambda r: r.id in dt_ids )
+        
         for last_dimdate in last_dimdates:
             last_fact = self.create_and_set_name({ 
                 'work_id': work_id.id,
                 'date_id': last_dimdate.id,
                 'date_type': date_type,
                 'last_workfact_id': last_fact.id })
-            last_fact._set_qty_delta()
-            last_fact._set_qty_open()
+            last_fact._post()
             
         return self.create_and_set_name({
                 'work_id': work_id.id,
@@ -402,14 +441,26 @@ class Workfact(models.Model):
                 'date_type': date_type,
                 'last_workfact_id': last_fact.id  })
 
+
+    @api.multi
+    def _post(self):
+        for rec in self:
+            rec._set_qty_delta()
+            rec._set_qty_open()
+            rec._set_amount()
+    
     @api.multi
     def post(self,worksheets):
         self.ensure_one()
-        self.worksheet_ids |= worksheets
-        self._set_qty_delta()
-        self._set_qty_open()
-
-    #@api.multi
-    #def set_qty_delta(self):
+        if self.work_type == 'node' and self.date_type == 'day':
+            self.worksheet_ids |= worksheets
+            self._post()
+            
+            date_types = ['week' #,'month','quarter','year'
+            ]
+            
+            for date_type in date_types:
+                fact = self.find_or_create(self.work_id,self.date, date_type)
+                fact._post()
         
     
