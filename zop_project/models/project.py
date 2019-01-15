@@ -367,7 +367,7 @@ class Workfact(models.Model):
             ('date','<',date)], order='date desc', limit=1 )
             
         if not last_fact:
-            return create({
+            return self.create({
                 'work_id': work_id.id,
                 'date_id': dimdate.id,
                 'date_type': date_type })
@@ -377,13 +377,13 @@ class Workfact(models.Model):
             ('date','<', date)], order='date' )
                 
         for last_dimdate in last_dimdates:
-            last_fact = fact.create({ 
+            last_fact = self.create({ 
                 'work_id': work_id.id,
                 'date_id': last_dimdate.id,
                 'date_type': date_type,
                 'last_workfact_id': last_fact.id })
             
-        return create({
+        return self.create({
                 'work_id': work_id.id,
                 'date_id': dimdate.id,
                 'date_type': date_type,
