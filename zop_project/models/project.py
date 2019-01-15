@@ -90,8 +90,8 @@ class Work(models.Model):
     price = fields.Float('Price', default=0.0 )
     amount = fields.Float('Planed Amount', default=0.0, compute='_compute_amount' )
     
-    #@api.multi
-    #@api.onchange('child_ids.amount')
+    @api.multi
+    @api.onchange('child_ids.amount')
     def _set_price(self):
         for rec in self:
             if rec.work_type == 'group' or ( rec.work_type == 'node' and rec.child_ids ):
@@ -110,12 +110,15 @@ class Work(models.Model):
     @api.multi
     def write(self,vals):
         old_parent_id = self.parent_id.id
+        old_name = self.name
+        old_amout = self.amount
+        
         ret = super(Work, self).write(vals)
-        if vals.get('name') or vals.get('parent_id'):
+        
+        if old_name != self.name or old_parent_id != self.parent_id.id:
             self._set_full_name()
             
-
-        if vals.get('parent_id') or vals.get('price') or vals.get('qty'):
+        if old_parent_id != self.parent_id.id or old_amout != self.amount:
             parents = self.search([('id','parent_of', self.id)])
             if old_parent_id:
                 old_parents = self.search([('id','parent_of', old_parent_id)])
@@ -132,9 +135,10 @@ class Work(models.Model):
         work = super(Work, self).create(vals)
         work._set_full_name()
         
-        parents = work.search([('id','parent_of', work.id)])
-        for parent in parents:
-            parent._set_price()
+        if work.amount and parent_id:
+            parents = work.search([('id','parent_of', work.id)])
+            for parent in parents:
+                parent._set_price()
             
         return work
 
