@@ -375,7 +375,7 @@ class Workfact(models.Model):
     @api.depends('amount_open','amount_delta')
     def _compute_amount_close(self):
         for rec in self:
-            self.amount_close = self.amount_open + self.amount_delta
+            rec.amount_close = rec.amount_open + rec.amount_delta
 
     @api.multi
     @api.depends('amount','amount_close')
