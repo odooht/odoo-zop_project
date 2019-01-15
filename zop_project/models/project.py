@@ -351,6 +351,14 @@ class Workfact(models.Model):
                        ) and ( rec.amount_close / rec.amount ) or 0.0
 
     @api.model
+    def create_and_set_name(self, vals):
+        fact = self.create(vals)
+        fact._set_full_name()
+        fact._set_name()
+        return fact
+    
+
+    @api.model
     def find_or_create(self,work_id,date,date_type ):
         dimdate = self.env['olap.dim.date'].search([('date','=', date)], limit=1)
         fact = self.search([
@@ -367,7 +375,7 @@ class Workfact(models.Model):
             ('date','<',date)], order='date desc', limit=1 )
             
         if not last_fact:
-            return self.create({
+            return self.create_and_set_name({
                 'work_id': work_id.id,
                 'date_id': dimdate.id,
                 'date_type': date_type })
@@ -377,13 +385,13 @@ class Workfact(models.Model):
             ('date','<', date)], order='date' )
                 
         for last_dimdate in last_dimdates:
-            last_fact = self.create({ 
+            last_fact = self.create_and_set_name({ 
                 'work_id': work_id.id,
                 'date_id': last_dimdate.id,
                 'date_type': date_type,
                 'last_workfact_id': last_fact.id })
             
-        return self.create({
+        return self.create_and_set_name({
                 'work_id': work_id.id,
                 'date_id': dimdate.id,
                 'date_type': date_type,
