@@ -156,9 +156,27 @@ def worksheet_one_fname(rec):
         #print execute(usid, model, 'read', id)
         pass
 
+def worksheet_one_post(rec):
+    nrec = {'post':1 }
+    domain = [('code','=',rec['work_id']),('project_id','=',project_id) ]
+    work_id = search_one('project.work', domain )
+    
+    model = 'project.worksheet'
+    domain = [('date','=',rec['date']),('number','=',rec['number']),('work_id','=',work_id) ]
+    
+    id = find(model, domain, record=nrec )
+    print id
+    if id:
+        #print execute(usid, model, 'read', id)
+        pass
+
 def worksheet_fname():
     for rec in records['project.worksheet']:
         worksheet_one_fname(rec)
+    
+def worksheet_post():
+    for rec in records['project.worksheet']:
+        worksheet_one_post(rec)
     
 
 
@@ -175,10 +193,11 @@ work3_amount()
 
 date_multi()
 worksheet_multi()
+worksheet_fname()
 
 """
 
-worksheet_fname()
+worksheet_post()
 
 """ 
 wsids = execute(usid, 'project.worksheet', 'search', [] )

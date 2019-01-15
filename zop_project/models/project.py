@@ -207,10 +207,24 @@ class Worksheet(models.Model):
             rec._set_code()
             rec._set_name()
             rec._set_full_name()
+    
+    def _post_one(self):
+        fact = self.env[('project.workfact')].find_or_create(self.work_id, self.date, 'day')
+        fact.post(self)
+    
+    @api.multi
+    def post(self):
+        for rec in self:
+            rec.state = 'post'
+            rec._post_one()
 
     @api.multi
     def write(self,vals):
         set_name = vals.get('set_name')
+        post = vals.get('post')
+        
+        if post:
+            del vals['post']
         
         if set_name:
             del vals['set_name']
@@ -220,6 +234,9 @@ class Worksheet(models.Model):
         if set_name:
             self.set_name()
         
+        if post:
+            self.post()
+
         return ret
 
 class DateDimention(models.Model):
@@ -332,6 +349,50 @@ class Workfact(models.Model):
         for rec in self:
             rec.rate = ( rec.amount and rec.amount_close 
                        ) and ( rec.amount_close / rec.amount ) or 0.0
+
+    @api.model
+    def find_or_create(self,work_id,date,date_type ):
+        dimdate = self.env['olap.dim.date'].search([('date','=', date)], limit=1)
+        fact = self.search([
+            ('work_id','=', work_id.id),
+            ('date_id','=',dimdate.id),
+            ('date_type','=',date_type)], limit=1 )
+
+        if fact:
+            return fact
+        
+        last_fact = self.search([
+            ('work_id','=', work_id.id), 
+            ('date_type','=',date_type),
+            ('date','<',date)], order='date desc', limit=1 )
+            
+        if not last_fact:
+            return create({
+                'work_id': work_id.id,
+                'date_id': dimdate.id,
+                'date_type': date_type })
+        
+        last_dimdates = self.env['olap.dim.date'].search([
+            ('date','>', last_fact.date),
+            ('date','<', date)], order='date' )
+                
+        for last_dimdate in last_dimdates:
+            last_fact = fact.create({ 
+                'work_id': work_id.id,
+                'date_id': last_dimdate.id,
+                'date_type': date_type,
+                'last_workfact_id': last_fact.id })
+            
+        return create({
+                'work_id': work_id.id,
+                'date_id': dimdate.id,
+                'date_type': date_type,
+                'last_workfact_id': last_fact.id  })
+
+    @api.multi
+    def post(self,worksheets)
+        self.ensure_one()
+        self.worksheet_ids |= worksheets
 
     #@api.multi
     #def set_qty_delta(self):
