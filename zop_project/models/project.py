@@ -390,7 +390,7 @@ class Workfact(models.Model):
                 'last_workfact_id': last_fact.id  })
 
     @api.multi
-    def post(self,worksheets)
+    def post(self,worksheets):
         self.ensure_one()
         self.worksheet_ids |= worksheets
 
