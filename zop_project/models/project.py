@@ -393,6 +393,8 @@ class Workfact(models.Model):
     def post(self,worksheets):
         self.ensure_one()
         self.worksheet_ids |= worksheets
+        self._set_qty_delta()
+        self._set_qty_open()
 
     #@api.multi
     #def set_qty_delta(self):
