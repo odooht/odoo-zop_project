@@ -54,7 +54,7 @@ class Work(models.Model):
         for rec in self:
             fname = []
             if rec.parent_id:
-                pname = rec.parent_id.full_name:
+                pname = rec.parent_id.full_name
                 fname.append( pname and pname or '' )
                 
             fname.append(rec.name and rec.name or '') 
