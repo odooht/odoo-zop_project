@@ -40,6 +40,7 @@ class Project(models.Model):
     
 class Work(models.Model):
     _name = "project.work"
+    _description = "Project Workfact"
     _order = 'code'
     _rec_name = 'full_name'
     _parent_store = True
@@ -380,11 +381,7 @@ class Workfact(models.Model):
                 'date_id': dimdate.id,
                 'date_type': date_type })
 
-        print(last_fact)
-        last_fact.sorted(key='date', reverse=True)
-        print(last_fact)
-        last_fact = last_fact[0]
-        print(last_fact)
+        last_fact = last_fact.filtered( lambda r: r.date == max(last_fact.mapped('date') ) )
         
         last_dimdates = self.env['olap.dim.date'].search([
             ('date','>', last_fact.date),
@@ -396,6 +393,8 @@ class Workfact(models.Model):
                 'date_id': last_dimdate.id,
                 'date_type': date_type,
                 'last_workfact_id': last_fact.id })
+            last_fact._set_qty_delta()
+            last_fact._set_qty_open()
             
         return self.create_and_set_name({
                 'work_id': work_id.id,
