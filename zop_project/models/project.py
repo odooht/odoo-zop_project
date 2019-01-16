@@ -423,7 +423,7 @@ class Workfact(models.Model):
         last_fact = self.search([
             ('work_id','=', work_id.id), 
             ('date_type','=',date_type),
-            ('date','<',date)])
+            ('date','<',dimdate.date)])
             
         if not last_fact:
             return self.create_and_set_name({
@@ -435,7 +435,7 @@ class Workfact(models.Model):
         
         last_dimdates = self.env['olap.dim.date'].search([
             ('date','>', last_fact.date),
-            ('date','<', date)], order='date' )
+            ('date','<', dimdate.date)], order='date' )
                 
         keys = last_dimdates.mapped( date_type + 'key' )
         dt_ids = [ self.env['olap.dim.date'].get_by_key(date_type,key).id for key in keys ]

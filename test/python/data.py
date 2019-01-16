@@ -177,19 +177,19 @@ date_dim()
 
 records['project.worksheet'] = [
   {'work_id': '1.1.1',   'date':'2019-1-1',  'number': 1, 'qty':2.2 },
+  {'work_id': '1.1.1',   'date':'2019-1-1',  'number': 2, 'qty':2.1 },
+  {'work_id': '1.1.1',   'date':'2019-1-2',  'number': 1, 'qty':2.3 },
+  {'work_id': '1.1.1',   'date':'2019-1-12', 'number': 1, 'qty':2.4 },
 ]
 
 """
 
-  {'work_id': '1.1.1',   'date':'2019-1-1',  'number': 2, 'qty':2.1 },
-  {'work_id': '1.1.1',   'date':'2019-1-2',  'number': 1, 'qty':2.3 },
-  {'work_id': '1.1.1',   'date':'2019-1-4',  'number': 1, 'qty':2.0 },
-  {'work_id': '1.1.1',   'date':'2019-1-6',  'number': 1, 'qty':2.2 },
-  {'work_id': '1.1.1',   'date':'2019-1-8',  'number': 1, 'qty':2.3 },
-  {'work_id': '1.1.1',   'date':'2019-1-12', 'number': 1, 'qty':2.4 },
   {'work_id': '1.1.1',   'date':'2019-1-20', 'number': 1, 'qty':2.2 },
   {'work_id': '1.1.1',   'date':'2019-2-1',  'number': 1, 'qty':2.02 },
   {'work_id': '1.1.1',   'date':'2019-3-12', 'number': 1, 'qty':2.03 },
+  {'work_id': '1.1.1',   'date':'2019-4-4',  'number': 1, 'qty':2.0 },
+  {'work_id': '1.1.1',   'date':'2019-5-6',  'number': 1, 'qty':2.2 },
+  {'work_id': '1.1.1',   'date':'2019-5-8',  'number': 1, 'qty':2.3 },
   {'work_id': '1.1.1',   'date':'2019-6-1',  'number': 1, 'qty':2.01 },
   {'work_id': '1.1.1',   'date':'2019-8-2',  'number': 1, 'qty':2.03 },
   {'work_id': '1.1.1',   'date':'2019-12-1', 'number': 1, 'qty':2.06 },
