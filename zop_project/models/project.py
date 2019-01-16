@@ -265,7 +265,8 @@ class DateDimention(models.Model):
 
     @api.model
     def get_by_key(self,date_type,key ):
-        dimdates = self.search([(date_type + 'key','=', key )])
+        key_name = self.get_key_name(date_type)
+        dimdates = self.search([(key_name,'=', key )])
         min_date = min(dimdates.mapped('date'))
         return self.search([('date','=', min_date)], limit=1)
 
