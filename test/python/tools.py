@@ -189,29 +189,17 @@ print usid, uid
 
 project_id = project_one()
 
-""" 
+"""
 work2_multi()
 work2_multi_parent()
 work3_fname()
 work3_amount()
+#date_multi()
 
-date_multi()
-worksheet_multi()
-worksheet_fname()
-
-"""
 print 'create worksheet'
 worksheet_multi()
 print 'name worksheet'
 worksheet_fname()
+"""
 worksheet_post()
 
-""" 
-wsids = execute(usid, 'project.worksheet', 'search', [] )
-
-if wsids:
-    id = wsids[0]
-    print execute(usid, 'project.worksheet', 'read', id,['name','date'] )
-    print execute(usid, 'project.worksheet', 'write', id,{'date':'2019-1-1'} )
-    print execute(usid, 'project.worksheet', 'read', id,['name','date'] )
-"""

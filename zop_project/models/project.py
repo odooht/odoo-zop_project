@@ -490,7 +490,7 @@ class Workfact(models.Model):
                     ('work_id','=',pw.id ) ], limit=1)
                 
             if not parent_fact:
-                parent_fact = self.create({
+                parent_fact = self.create_and_set_name({
                     'date_id': self.date_id.id, 
                     'date_type': self.date_type,
                     'work_id': pw.id
