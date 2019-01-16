@@ -470,6 +470,7 @@ class Workfact(models.Model):
                 'date_type': date_type,
                 'last_workfact_id': last_fact.id })
             last_fact._post_me()
+            last_fact._post_parent()
             
         return self.create_and_set_name({
                 'work_id': work_id.id,
