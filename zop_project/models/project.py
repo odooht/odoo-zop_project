@@ -334,15 +334,24 @@ class Workfact(models.Model):
         
     qty_close = fields.Float('Close Quantity', default=0.0, compute='_compute_qty_close' )
 
+    @api.multi
     def get_childs(self,type):
+        self.ensure_one()
         if type=='date':
             dates = self.env['olap.dim.date'].get_childs(self.date_type, self.date_id)
             return self.search([
                 ('date_id','in',dates.ids), 
                 ('date_type','=', 'day'),
                 ('work_id','=',self.work_id.id ) ])
+        if type=='work':
+            childs = self.work_id.search([
+                ('id','child_of',self.work_id.id),
+                ('work_type','=','node') ])
+                
+            return self.search([('id','in',childs.id)])
         else:
             pass
+
 
     @api.multi
     @api.onchange('worksheet_ids.qty')
@@ -389,8 +398,9 @@ class Workfact(models.Model):
                 rec.amount_delta = rec.qty_delta * rec.price
                 
             else:
-                # sum from node
-                pass
+                childs = rec.get_childs('work')
+                rec.amount_open = sum( childs.mapped('amount_open') )
+                rec.amount_delta = sum( childs.mapped('amount_delta') )
 
     @api.multi
     @api.depends('amount_open','amount_delta')
@@ -463,25 +473,68 @@ class Workfact(models.Model):
                 'date_type': date_type,
                 'last_workfact_id': last_fact.id  })
 
+    @api.multi
+    def find_or_create_parents(self,type):
+        self.ensure_one()
+        parent_works = self.work_id.search([('id','parent_of',self.work_id.id)])
+            
+        parent_facts = self.env['project.workfact']
+        for pw in parent_works:
+            parent_fact = self.search([
+                    ('date_id','=',self.date_id.id), 
+                    ('date_type','=', self.date_type),
+                    ('work_id','=',pw ) ], limit=1)
+                
+            if not parent_fact:
+                parent_fact = self.create({
+                    'date_id': self.date_id.id, 
+                    'date_type': self.date_type,
+                    'work_id': pw
+                })
+            
+            parent_facts |= parent_fact
+            
+        return parent_facts
 
     @api.multi
-    def _post(self):
+    def _post_me(self):
         for rec in self:
             rec._set_qty_delta()
             rec._set_qty_open()
             rec._set_amount()
     
     @api.multi
-    def post(self,worksheets):
+    def _post_parent(self):
+        for rec in self:
+            if rec.work_type == 'node':
+                parents = rec.find_or_create_parents()
+                if parents:
+                    parents._set_amount()
+    
+    
+    @api.multi
+    def post(self,worksheets=None):
         self.ensure_one()
-        if self.work_type == 'node' and self.date_type == 'day':
-            self.worksheet_ids |= worksheets
-            self._post()
+        if self.work_type == 'node':
+            if self.date_type == 'day':
+                if worksheets:
+                    self.worksheet_ids |= worksheets
+                self._post_me()
+                self._post_parent()
             
-            date_types = ['week' ,'month','quarter','year']
+                date_types = ['week' ,'month','quarter','year']
+                for date_type in date_types:
+                    fact = self.find_or_create(self.work_id,self.date, date_type)
+                    fact._post_me()
+                    fact._post_parent()
+                    
+            else:
+                #self._post_me()
+                pass
+        else:
+            #self._post_me()
+            pass
             
-            for date_type in date_types:
-                fact = self.find_or_create(self.work_id,self.date, date_type)
-                fact._post()
-        
+            
+            
     

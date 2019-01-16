@@ -177,6 +177,9 @@ date_dim()
 
 records['project.worksheet'] = [
   {'work_id': '1.1.1',   'date':'2019-1-1',  'number': 1, 'qty':2.2 },
+]
+
+"""
   {'work_id': '1.1.1',   'date':'2019-1-1',  'number': 2, 'qty':2.1 },
   {'work_id': '1.1.1',   'date':'2019-1-2',  'number': 1, 'qty':2.3 },
   {'work_id': '1.1.1',   'date':'2019-1-12', 'number': 1, 'qty':2.4 },
@@ -191,3 +194,4 @@ records['project.worksheet'] = [
   {'work_id': '1.1.1',   'date':'2019-12-1', 'number': 1, 'qty':2.06 },
 ]
 
+"""
