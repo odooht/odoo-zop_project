@@ -474,7 +474,7 @@ class Workfact(models.Model):
                 'last_workfact_id': last_fact.id  })
 
     @api.multi
-    def find_or_create_parents(self,type):
+    def find_or_create_parents(self):
         self.ensure_one()
         parent_works = self.work_id.search([('id','parent_of',self.work_id.id)])
             
