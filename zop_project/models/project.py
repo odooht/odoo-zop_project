@@ -349,7 +349,7 @@ class Workfact(models.Model):
                 ('work_type','=','node') ])
                 
             return self.search([
-                ('work_id','in',childs.id),
+                ('work_id','in',childs.ids),
                 ('date_id','=',self.date_id.id),
                 ('date_type','=',self.date_type),
             ])
