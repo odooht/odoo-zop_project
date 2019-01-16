@@ -256,6 +256,12 @@ class DateDimention(models.Model):
     month = fields.Integer(help='m')
     week = fields.Integer(help='w')
     day = fields.Integer(help='d')
+    
+    @api.model
+    def get_key_name(self, date_type):
+        key = date_type != 'year' and 'key' or ''
+        return date_type + key
+        
 
     @api.model
     def get_by_key(self,date_type,key ):
@@ -265,7 +271,7 @@ class DateDimention(models.Model):
 
     @api.model
     def get_childs(self,date_type, parent ):
-        attr = date_type + 'key'
+        attr = self.get_key_name(date_type)
         return self.search([(attr,'=', getattr(parent, attr))])
 
 class Workfact(models.Model):
@@ -409,7 +415,8 @@ class Workfact(models.Model):
     @api.model
     def find_or_create(self,work_id,date,date_type ):
         dimdate = self.env['olap.dim.date'].search([('date','=', date)], limit=1)
-        key = getattr(dimdate,date_type + 'key')
+        key_name = self.env['olap.dim.date'].get_key_name(date_type)
+        key = getattr(dimdate, key_name)
         dimdate = self.env['olap.dim.date'].get_by_key(date_type,key)
         
         fact = self.search([
@@ -437,7 +444,7 @@ class Workfact(models.Model):
             ('date','>', last_fact.date),
             ('date','<', dimdate.date)], order='date' )
                 
-        keys = last_dimdates.mapped( date_type + 'key' )
+        keys = last_dimdates.mapped( key_name )
         dt_ids = [ self.env['olap.dim.date'].get_by_key(date_type,key).id for key in keys ]
         last_dimdates = last_dimdates.filtered( lambda r: r.id in dt_ids )
         
