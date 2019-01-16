@@ -483,7 +483,7 @@ class Workfact(models.Model):
             parent_fact = self.search([
                     ('date_id','=',self.date_id.id), 
                     ('date_type','=', self.date_type),
-                    ('work_id','=',pw ) ], limit=1)
+                    ('work_id','=',pw.id ) ], limit=1)
                 
             if not parent_fact:
                 parent_fact = self.create({
