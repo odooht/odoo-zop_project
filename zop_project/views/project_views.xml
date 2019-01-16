@@ -222,12 +222,14 @@
                     <field name="qty_open"/>
                     <field name="qty_delta"/>
                     <field name="qty_close"/>
+                    <!--
                     <field name="price"/>
                     <field name="day"/>
                     <field name="week"/>
                     <field name="month"/>
                     <field name="quarter"/>
                     <field name="year"/>
+                    -->
                 </tree>
             </field>
         </record>
