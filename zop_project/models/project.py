@@ -489,7 +489,7 @@ class Workfact(models.Model):
                 parent_fact = self.create({
                     'date_id': self.date_id.id, 
                     'date_type': self.date_type,
-                    'work_id': pw
+                    'work_id': pw.id
                 })
             
             parent_facts |= parent_fact
