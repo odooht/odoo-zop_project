@@ -348,7 +348,11 @@ class Workfact(models.Model):
                 ('id','child_of',self.work_id.id),
                 ('work_type','=','node') ])
                 
-            return self.search([('id','in',childs.id)])
+            return self.search([
+                ('work_id','in',childs.id),
+                ('date_id','=',self.date_id.id),
+                ('date_type','=',self.date_type),
+            ])
         else:
             pass
 
