@@ -212,22 +212,22 @@
                     <field name="project_id"/>
                     <field name="work_id"/>
                     <field name="date"/>
-                    <field name="year"/>
-                    <field name="quarter"/>
-                    <field name="month"/>
-                    <field name="week"/>
-                    <field name="day"/>
                     <field name="date_type"/>
-                    <field name="price"/>
-                    <field name="qty"/>
-                    <field name="qty_open"/>
-                    <field name="qty_delta"/>
-                    <field name="qty_close"/>
                     <field name="amount"/>
                     <field name="amount_open"/>
                     <field name="amount_delta"/>
                     <field name="amount_close"/>
                     <field name="rate"/>
+                    <field name="qty"/>
+                    <field name="qty_open"/>
+                    <field name="qty_delta"/>
+                    <field name="qty_close"/>
+                    <field name="price"/>
+                    <field name="day"/>
+                    <field name="week"/>
+                    <field name="month"/>
+                    <field name="quarter"/>
+                    <field name="year"/>
                 </tree>
             </field>
         </record>
