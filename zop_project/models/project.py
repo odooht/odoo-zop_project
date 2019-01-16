@@ -469,7 +469,7 @@ class Workfact(models.Model):
                 'date_id': last_dimdate.id,
                 'date_type': date_type,
                 'last_workfact_id': last_fact.id })
-            last_fact._post()
+            last_fact._post_me()
             
         return self.create_and_set_name({
                 'work_id': work_id.id,
