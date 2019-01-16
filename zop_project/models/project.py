@@ -470,8 +470,7 @@ class Workfact(models.Model):
             self.worksheet_ids |= worksheets
             self._post()
             
-            date_types = ['week' #,'month','quarter','year'
-            ]
+            date_types = ['week' ,'month','quarter','year']
             
             for date_type in date_types:
                 fact = self.find_or_create(self.work_id,self.date, date_type)
