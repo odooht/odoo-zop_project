@@ -426,7 +426,6 @@ class Workfact(models.Model):
         fact._set_name()
         return fact
 
-    
     @api.model
     def find_or_create(self,work_id,date,date_type ):
         dimdate = self.env['olap.dim.date'].search([('date','=', date)], limit=1)
@@ -516,7 +515,6 @@ class Workfact(models.Model):
                 if parents:
                     parents._set_amount()
     
-    
     @api.multi
     def post(self,worksheets=None):
         self.ensure_one()
@@ -539,7 +537,3 @@ class Workfact(models.Model):
         else:
             #self._post_me()
             pass
-            
-            
-            
-    
