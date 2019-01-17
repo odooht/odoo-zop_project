@@ -64,7 +64,7 @@ project.worksheet|write|{'post':1}|Boolean|api.multi,<br>相当于post函数
 
 model|field|String|type|note
 -----|-----|------|----|----
-project.workfact|work_id|工程|Many2one|project.work<br>仅末端节点工程
+project.workfact|work_id|工程|Many2one|project.work
 project.workfact|date_id|日期维度|Many2one|olap.dim.date
 project.workfact|date_type|日期维度类型|Selection|('day','日'),<br>('week','周'),<br>('month','月'),<br>('quarter','季'),<br>('year','年'),
 project.workfact|date|日期|Date|日期
@@ -78,13 +78,13 @@ project.workfact|qty|设计数量|Float|
 project.workfact|amount|设计产值|Float|
 project.workfact|worksheet_ids|包含的工单|Many2many|project.worksheet,
 project.workfact|last_workfact_id|期初值来自于|Many2one|project.workfact
-project.workfact|qty_open|期初数量|Float|work_type=node,<br>来自于last_workfact_id.qty_close;work_type=group,该值无效
+project.workfact|qty_open|期初数量|Float|work_type=node,<br>来自于last_workfact_id.qty_close;<br>work_type=group,该值无效
 project.workfact|qty_delta|本期数量|Float|work_type=node,<br>每日汇总自worksheet_ids,<br>每周月汇总自日;<br>work_type=group,该值无效
 project.workfact|qty_close|期末数量|Float|期初+本期=期末
-project.workfact|amount_open|期初产值|Float|work_type=node,<br>计算自qty_open*price;work_type=group,汇总自下级工程
-project.workfact|amount_delta|本期产值|Float|work_type=node,<br>计算自qty_delta*price;work_type=group,汇总自下级工程
+project.workfact|amount_open|期初产值|Float|work_type=node,<br>计算自qty_open*price;<br>work_type=group,汇总自下级工程
+project.workfact|amount_delta|本期产值|Float|work_type=node,<br>计算自qty_delta*price;<br>work_type=group,汇总自下级工程
 project.workfact|amount_close|期末产值|Float|期初+本期=期末
-project.workfact|rate|期末完成率|Float|累计完成/设计
+project.workfact|rate|期末完成率|Float|累计完成产值 / 设计产值
 
 model|field|String|type|note
 -----|-----|------|----|----
