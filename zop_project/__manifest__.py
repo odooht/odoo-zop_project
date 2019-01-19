@@ -17,6 +17,7 @@ Project Schdule Manage.
     'depends': ['project', 'uom'],
     'data': [
         'security/ir.model.access.csv',
+        'security/project_security.xml',
         'views/project_views.xml',
     ],
     'demo': [
