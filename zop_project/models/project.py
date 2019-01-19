@@ -52,6 +52,7 @@ class Work(models.Model):
     date_from = fields.Datetime(string='Starting Date')
     date_thru = fields.Datetime(string='Ending Date' )
     project_id = fields.Many2one('project.project', string='Project')
+    company_id = fields.Many2one('res.company', string='Company', related='project_id.company_id')
     partner_id = fields.Many2one('res.partner', string='Customer',)
     
     parent_id = fields.Many2one('project.work', string='Parent Work')
@@ -167,6 +168,7 @@ class Worksheet(models.Model):
     
     work_id = fields.Many2one('project.work', 'Work')
     project_id = fields.Many2one(related='work_id.project_id')
+    company_id = fields.Many2one('res.company', string='Company', related='work_id.company_id')
     uom_id = fields.Many2one(related='work_id.uom_id')
     price = fields.Float(related='work_id.price')
     qty = fields.Float('Quantity', default=0.0)
@@ -245,6 +247,7 @@ class DateDimention(models.Model):
     _description = "OLAP Dimention Date"
     _rec_name = 'daykey'
     
+    company_id = fields.Many2one('res.company', string='Company', required=True, default=lambda self: self.env.user.company_id)
     date = fields.Date('Date',required=True,index=True )
     daykey = fields.Integer(help='yyyymmdd')
     weekkey = fields.Integer(help='yyyyww')
@@ -305,6 +308,7 @@ class Workfact(models.Model):
 
     project_id = fields.Many2one(related='work_id.project_id')
     work_id = fields.Many2one('project.work', 'Work')
+    company_id = fields.Many2one('res.company', string='Company', related='work_id.company_id')
     uom_id = fields.Many2one(related='work_id.uom_id')
     price = fields.Float(related='work_id.price')
     work_type = fields.Selection(related='work_id.work_type')
