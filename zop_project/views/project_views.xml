@@ -140,6 +140,7 @@
             <field name="model">project.worksheet</field>
             <field name="arch" type="xml">
                 <tree string="Worksheets">
+                    <field name="company_id"/>
                     <field name="full_name"/>
                     <field name="project_id"/>
                     <field name="work_id"/>
