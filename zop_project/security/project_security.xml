@@ -10,5 +10,35 @@
                                     ]</field>
     </record>
 
+    <record model="ir.rule" id="project_worksheet_comp_rule">
+        <field name="name">Project: multi-company</field>
+        <field name="model_id" ref="model_project_worksheet"/>
+        <field name="global" eval="True"/>
+        <field name="domain_force">['|',
+                                        ('company_id', '=', False),
+                                        ('company_id', 'child_of', [user.company_id.id]),
+                                    ]</field>
+    </record>
+
+    <record model="ir.rule" id="project_workfact_comp_rule">
+        <field name="name">Project: multi-company</field>
+        <field name="model_id" ref="model_project_workfact"/>
+        <field name="global" eval="True"/>
+        <field name="domain_force">['|',
+                                        ('company_id', '=', False),
+                                        ('company_id', 'child_of', [user.company_id.id]),
+                                    ]</field>
+    </record>
+
+    <record model="ir.rule" id="project_dimdate_comp_rule">
+        <field name="name">Project: multi-company</field>
+        <field name="model_id" ref="model_olap_dim_date"/>
+        <field name="global" eval="True"/>
+        <field name="domain_force">['|',
+                                        ('company_id', '=', False),
+                                        ('company_id', 'child_of', [user.company_id.id]),
+                                    ]</field>
+    </record>
+
 </odoo>
 
