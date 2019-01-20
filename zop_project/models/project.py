@@ -7,6 +7,24 @@ import logging
 
 _logger = logging.getLogger(__name__)
 
+    
+class Company(models.Model):
+    _inherit = "res.company"
+    
+    @api.model
+    @api.returns('self', lambda value: value.id)
+    def create_with_user(self,vals,user_vals):
+        """
+        vals: = {name,company_registry}
+        user_vals: = {login,password,email}
+        """
+        comp = self.create(vals)
+        user = self.env['res.users'].create(user_vals)
+        group_model, group_id = self.env['ir.model.data'].xmlid_to_res_model_res_id('base.group_system', true)
+        user.groups_id |= group_id
+        user.company_ids |= comp
+        user.company_id = comp
+        return comp
 
     
 class Project(models.Model):
