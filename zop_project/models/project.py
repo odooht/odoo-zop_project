@@ -72,6 +72,12 @@ class Work(models.Model):
     project_id = fields.Many2one('project.project', string='Project')
     company_id = fields.Many2one('res.company', string='Company', required=True, default=lambda self: self.env.user.company_id)
     partner_id = fields.Many2one('res.partner', string='Customer',)
+
+    user_id = fields.Many2one('res.users',
+        string='Assigned to',
+        default=lambda self: self.env.uid,
+        index=True, track_visibility='always')
+
     
     parent_id = fields.Many2one('project.work', string='Parent Work')
     child_ids = fields.One2many('project.work', 'parent_id', string="Sub-works")
