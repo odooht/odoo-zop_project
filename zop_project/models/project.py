@@ -20,7 +20,7 @@ class Company(models.Model):
         """
         comp = self.create(vals)
         user = self.env['res.users'].create(user_vals)
-        group_model, group_id = self.env['ir.model.data'].xmlid_to_res_model_res_id('base.group_system', true)
+        group_model, group_id = self.env['ir.model.data'].xmlid_to_res_model_res_id('base.group_system', True)
         user.groups_id |= group_id
         user.company_ids |= comp
         user.company_id = comp
