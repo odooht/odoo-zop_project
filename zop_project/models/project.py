@@ -105,7 +105,7 @@ class Work(models.Model):
     worksheet_ids = fields.One2many('project.worksheet','work_id',string='Worksheets')
 
     @api.multi
-    @api.onchange('name','parent_id.full_name')
+    @api.onchange('name','parent_id') # parent_id.full_name
     def _set_full_name(self):
         for rec in self:
             fname = []
@@ -138,7 +138,7 @@ class Work(models.Model):
             work.subwork_count = mapping.get(work.id, 0)
 
     @api.multi
-    @api.onchange('child_ids.amount')
+    @api.onchange('child_ids') # child_ids.amount
     def _set_price(self):
         for rec in self:
             if rec.work_type == 'group' or ( rec.work_type == 'node' and rec.child_ids ):
@@ -210,7 +210,7 @@ class Worksheet(models.Model):
         ], string='Status', default='draft')
 
     @api.multi
-    @api.onchange('date','number','work_id.code')
+    @api.onchange('date','number','work_id') # work_id.code
     def _set_code(self):
         for rec in self:
             rec.code = ( rec.work_id.code or '' ) + '.' + (
@@ -218,7 +218,7 @@ class Worksheet(models.Model):
                          str( rec.number or 0 ) )
 
     @api.multi
-    @api.onchange('date','number','work_id.name')
+    @api.onchange('date','number','work_id') # work_id.name
     def _set_name(self):
         for rec in self:
             rec.name = ( rec.work_id.name or '' ) + '.' + (
@@ -226,7 +226,7 @@ class Worksheet(models.Model):
                          str( rec.number or 0 ) )
 
     @api.multi
-    @api.onchange('date','number','work_id.name')
+    @api.onchange('date','number','work_id') # work_id.name
     def _set_full_name(self):
         for rec in self:
             rec.full_name = ( rec.work_id.full_name or '' ) + '.' + (
@@ -346,13 +346,13 @@ class Workfact(models.Model):
     amount = fields.Float('Planed Amount', default=0.0, related='work_id.amount')
 
     @api.multi
-    @api.onchange('daykey','work_id.name')
+    @api.onchange('daykey','work_id') # work_id.name
     def _set_name(self):
         for rec in self:
             rec.name = ( rec.work_id.name or '' ) + '.' + str(rec.daykey)
 
     @api.multi
-    @api.onchange('daykey','work_id.full_name')
+    @api.onchange('daykey','work_id') # work_id.full_name
     def _set_full_name(self):
         for rec in self:
             rec.full_name = ( rec.work_id.full_name or '' ) + '.' + str(rec.daykey)
@@ -391,7 +391,7 @@ class Workfact(models.Model):
 
 
     @api.multi
-    @api.onchange('worksheet_ids.qty')
+    @api.onchange('worksheet_ids') #worksheet_ids.qty
     def _set_qty_delta(self):
         for rec in self:
             if rec.work_type == 'node':
@@ -404,7 +404,7 @@ class Workfact(models.Model):
                 pass
 
     @api.multi
-    @api.onchange('last_workfact_id.qty_close')
+    @api.onchange('last_workfact_id') # last_workfact_id.qty_close
     def _set_qty_open(self):
         for rec in self:
             if rec.work_type == 'node':
