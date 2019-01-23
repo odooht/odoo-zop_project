@@ -11,6 +11,10 @@ _logger = logging.getLogger(__name__)
 class Company(models.Model):
     _inherit = "res.company"
     
+    vat = fields.Char(related='partner_id.vat', string="Tax ID", readonly=False)
+    user_id = fields.Many2one('res.users', string='Salesperson',
+        related='partner_id.user_id', readonly=False )
+
     @api.model
     @api.returns('self', lambda value: value.id)
     def create_with_user(self,vals,user_vals):
@@ -24,6 +28,7 @@ class Company(models.Model):
         user.groups_id |= self.env[group_model].browse(group_id)
         user.company_ids |= comp
         user.company_id = comp
+        comp.user_id = user
         return comp
 
     
