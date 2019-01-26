@@ -244,7 +244,7 @@
         
         
         <record id="ir_cron_projectfact" model="ir.cron">
-            <field name="name">Project: Send rating</field>
+            <field name="name">Project: send report</field>
             <field name="model_id" ref="zop_project.model_project_workfact"/>
             <field name="state">code</field>
             <field name="code">model._test_cron()</field>
