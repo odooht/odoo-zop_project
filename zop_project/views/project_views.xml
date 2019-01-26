@@ -241,6 +241,19 @@
                 </tree>
             </field>
         </record>
+        
+        
+        <record id="ir_cron_projectfact" model="ir.cron">
+            <field name="name">Project: Send rating</field>
+            <field name="model_id" ref="zop_project.model_project_workfact"/>
+            <field name="state">code</field>
+            <field name="code">model._test_cron()</field>
+            <field name="interval_type">minutes</field>
+            <field name="numbercall">-1</field>
+        </record>
+        
+        
+        
 
 </odoo>
 

@@ -198,6 +198,13 @@ class Worksheet(models.Model):
     work_id = fields.Many2one('project.work', 'Work')
     project_id = fields.Many2one(related='work_id.project_id')
     company_id = fields.Many2one('res.company', string='Company', required=True, default=lambda self: self.env.user.company_id)
+
+    user_id = fields.Many2one('res.users',
+        string='Assigned to',
+        default=lambda self: self.env.uid,
+        index=True, track_visibility='always')
+
+
     uom_id = fields.Many2one(related='work_id.uom_id')
     price = fields.Float(related='work_id.price')
     qty = fields.Float('Quantity', default=0.0)
@@ -570,3 +577,10 @@ class Workfact(models.Model):
         else:
             #self._post_me()
             pass
+
+
+    @api.model
+    def _test_cron(self):
+        pass
+        _logger.info('12345678901234567890')
+    
