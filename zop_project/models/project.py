@@ -279,6 +279,20 @@ class Worksheet(models.Model):
             rec.state = 'post'
             rec._post_one()
 
+    @api.model
+    def create(self,vals):
+        set_name = vals.get('set_name')
+        if set_name:
+            del vals['set_name']
+        
+        rec = super(Worksheet, self).create(vals)
+        
+        if set_name:
+            rec.set_name()
+        
+        return rec
+
+
     @api.multi
     def write(self,vals):
         set_name = vals.get('set_name')
