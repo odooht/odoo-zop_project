@@ -183,6 +183,28 @@ class Work(models.Model):
 
         return ret
 
+    @api.model
+    def create(self,vals):
+        set_full_name = vals.get('set_full_name')
+        set_amount = vals.get('set_amount')
+        
+        if set_full_name:
+            del vals['set_full_name']
+        
+        if set_amount:
+            del vals['set_amount']
+        
+        obj = super(Work, self).create(vals)
+        
+        if set_full_name:
+            obj.set_full_name()
+        
+        if set_amount:
+            obj.set_amount()
+
+        return obj
+
+
 class Worksheet(models.Model):
     _name = "project.worksheet"
     _description = "Project Worksheet"
